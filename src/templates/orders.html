@@ -1,0 +1,56 @@
+{% extends './base.html' %}
+
+{% block title %}Orders{% endblock %}
+
+{% block customCSS %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
+<!-- Link to a Google Font (example) -->
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+
+
+<div id="Pedidos" class="tabcontent">
+    <h2>Orders Data</h2>
+    <div class="content">
+        <table id="ordersTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>Estado</th>
+                    <th>Dirección</th>
+                    <th>Costo Total</th>
+                    <th>Fecha de creación</th>
+                    <th>Fecha de finalización</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr class="order-row" data-order-id="{{ order.id }}">
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.name }}</td>
+                    <td>{{ order.status }}</td>
+                    <td>{{ order.address }}</td>
+                    <td>{{ order.total_cost }}</td>
+                    <td>{{ order.creation_date }}</td>
+                    <td>
+                        {% if order.finish_date == '-' %}
+                            <button class="finish-button" data-order-id="{{ order.id }}">Terminar</button>
+                        {% else %}
+                            {{ order.finish_date }}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<footer>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</footer>
+
+{% endblock %}

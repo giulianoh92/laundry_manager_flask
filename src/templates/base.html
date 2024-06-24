@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <!-- Custom CSS -->
+    {% block customCSS %}
+    {% endblock %}
+</head>
+
+<body class="text-center">
+    <header>
+        <h1>Laundry Dashboard</h1>
+        <a class="btn btn-secondary" href="{{ url_for('logout') }}">Logout</a>
+    </header>
+    <div class="tab">
+        <a class="tablinks" href="{{ url_for('home') }}">Inicio</a>
+        <a class="tablinks" href="{{ url_for('orders') }}">Pedidos</a>
+        <a class="tablinks" href="{{ url_for('clients') }}">Clientes</a>
+    </div>
+    {% block body %}
+    {% endblock %}
+</body>
+
+</html>
