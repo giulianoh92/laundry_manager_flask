@@ -1,6 +1,10 @@
 document.addEventListener("DOMContentLoaded", function () {
+    // Cuando el DOM está completamente cargado, se ejecuta esta función anónima
+
+    // Obtener el token CSRF de la meta etiqueta
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
+    // Definir los endpoints para cada tipo de autocompletado
     const endpoints = {
         cliente_nombre: "/get_clients",
         item: "/get_items",
@@ -11,67 +15,154 @@ document.addEventListener("DOMContentLoaded", function () {
         tamano_objeto: "/get_sizes"
     };
 
-    function clearAndPopulateSelect(endpoint, selectId) {
-        const select = document.getElementById(selectId);
-        select.innerHTML = '';  // Clear all options
+    // Obtener referencia al input de texto y al contenedor de sugerencias
+    const input = document.getElementById('cliente_nombre');
+    const suggestionBox = document.getElementById('autocomplete-list');
 
-        // Add an empty option
-        const emptyOption = document.createElement("option");
-        emptyOption.value = '';
-        emptyOption.text = '-- Select an option --';
-        select.appendChild(emptyOption);
+    // Escuchar el evento de entrada (cuando el usuario escribe algo en el input)
+    input.addEventListener('input', function () {
+        // Obtener el valor actual del input y eliminar espacios en blanco al inicio y final
+        const query = this.value.trim();
+        
+        // Verificar si la consulta tiene al menos un caracter
+        if (query.length > 0) {
+            // Si la consulta tiene caracteres, llamar a la función para obtener sugerencias
+            fetchSuggestions(query);
+        } else {
+            // Si la consulta está vacía, vaciar el contenedor de sugerencias
+            suggestionBox.innerHTML = '';
+        }
+    });
 
-        fetch(endpoint, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            data.forEach(item => {
-                const option = document.createElement("option");
-                option.value = item.id; // Assuming each item has an `id` field
-                option.text = item.name || item.description; // Use `name` or `description`
-                select.appendChild(option);
+    // Función asincrónica para obtener sugerencias de la API
+    async function fetchSuggestions(query) {
+        try {
+            // Realizar una solicitud GET a la API usando el endpoint correspondiente y pasando la consulta como parámetro
+            const response = await fetch(`${endpoints.cliente_nombre}?query=${encodeURIComponent(query)}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                }
             });
-        })
-        .catch(error => console.error("Error fetching data:", error));
+            
+            // Verificar si la respuesta HTTP fue exitosa
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
+            // Parsear la respuesta JSON
+            const data = await response.json();
+            
+            // Mostrar las sugerencias obtenidas
+            showSuggestions(data, query); // Pasamos la consulta actual como parámetro adicional
+        } catch (error) {
+            // Capturar errores y mostrarlos en la consola del navegador
+            console.error('Error fetching suggestions:', error);
+        }
     }
 
-    function setupNewItems(newItem) {
-        const selects = newItem.querySelectorAll('select');
-        selects.forEach(select => {
-            const selectId = select.getAttribute('id');
-            if (endpoints.hasOwnProperty(selectId)) {
-                clearAndPopulateSelect(endpoints[selectId], selectId);
+    // Función para mostrar las sugerencias filtradas
+    function showSuggestions(suggestions, query) {
+        // Limpiar el contenedor de sugerencias antes de agregar nuevas sugerencias
+        suggestionBox.innerHTML = '';
+        
+        // Iterar sobre cada sugerencia recibida de la API
+        suggestions.forEach(suggestion => {
+            // Convertir el nombre de la sugerencia y la consulta actual a minúsculas para comparar
+            const suggestionName = suggestion.name.toLowerCase();
+            const queryLower = query.toLowerCase();
+            
+            // Verificar si el nombre de la sugerencia contiene la consulta actual
+            if (suggestionName.includes(queryLower)) {
+                // Si la sugerencia coincide, crear un elemento div para mostrarla
+                const div = document.createElement('div');
+                div.classList.add('autocomplete-suggestion');
+                div.textContent = suggestion.name; // Mostrar el nombre de la sugerencia
+                
+                // Agregar un evento click para seleccionar la sugerencia y llenar el input con su nombre
+                div.addEventListener('click', function () {
+                    input.value = suggestion.name;
+                    suggestionBox.innerHTML = ''; // Vaciar el contenedor de sugerencias después de seleccionar una
+                });
+                
+                // Agregar el div creado al contenedor de sugerencias
+                suggestionBox.appendChild(div);
             }
         });
     }
 
-    // Initial setup for existing items
-    Object.keys(endpoints).forEach(key => {
-        clearAndPopulateSelect(endpoints[key], key);
+    const addItemButton = document.getElementById('add-item');
+    const form = document.getElementById('order_form');
+    
+    // Agregar evento al botón de agregar item
+    addItemButton.addEventListener('click', function () {
+        addNewItemField();
     });
-
-    document.getElementById("btn_extender").addEventListener("click", function () {
-        document.getElementById("datos_cliente").style.display = "block";
-    });
-
-    document.getElementById("btn_agregar_item").addEventListener("click", function () {
-        const itemContainer = document.querySelector("fieldset .item").parentNode;
-        const newItem = document.querySelector(".item").cloneNode(true);
-
-        // Clear any input values in the cloned item
-        newItem.querySelectorAll('input[type="text"]').forEach(input => {
-            input.value = '';
+    
+    // Función para agregar un nuevo campo de item
+    function addNewItemField() {
+        const itemsContainer = document.querySelector('.item');
+        const newItemDiv = document.createElement('div');
+        newItemDiv.classList.add('item');
+        
+        // Generate a unique ID for the new item
+        const itemId = generateUniqueId(); // Implement your own function to generate unique IDs
+        
+        // HTML for the new item field
+        newItemDiv.innerHTML = `
+                        <div class="item-box">
+                            <div class="form-field">
+                                <label for="${itemId}-item">Item:</label>
+                                <select id="${itemId}-item" name="item[]" required></select>
+                            </div>
+                            <div class="form-field">
+                                <label for="${itemId}-tipo_servicio">Tipo de Servicio:</label>
+                                <select id="${itemId}-tipo_servicio" name="tipo_servicio[]" required></select>
+                            </div>
+                            <div class="form-field">
+                                <label for="${itemId}-color_principal">Color Principal:</label>
+                                <select id="${itemId}-color_principal" name="color_principal[]" required></select>
+                            </div>
+                            <div class="form-field">
+                                <label for="${itemId}-color_secundario">Color Secundario:</label>
+                                <select id="${itemId}-color_secundario" name="color_secundario[]"></select>
+                            </div>
+                            <div class="form-field">
+                                <label for="${itemId}-patron_tela">Patrón de Tela:</label>
+                                <select id="${itemId}-patron_tela" name="patron_tela[]"></select>
+                            </div>
+                            <div class="form-field">
+                                <label for="${itemId}-tamano_objeto">Tamaño del Objeto:</label>
+                                <select id="${itemId}-tamano_objeto" name="tamano_objeto[]"></select>
+                            </div>
+                            <div class="form-field">
+                                <label for="${itemId}-suavizante">Suavizante?</label>
+                                <input type="checkbox" id="${itemId}-suavizante" name="suavizante[]" value="si">
+                            </div>
+                            <div class="form-field">
+                                <label for="${itemId}-indicaciones">Indicaciones adicionales:</label>
+                                <input type="text" id="${itemId}-indicaciones" name="indicaciones[]">
+                            </div>
+                            <div class="form-field">
+                                <button type="button" class="delete-item">-</button>
+                            </div>
+                        </div>
+                        `;
+        
+        // Button to delete the new item field
+        const deleteButton = newItemDiv.querySelector('.delete-item');
+        deleteButton.addEventListener('click', function () {
+            newItemDiv.remove();
         });
-
-        // Clear and populate selects in the cloned item
-        setupNewItems(newItem);
-
-        // Insert the new item before the "Agregar Item" button
-        itemContainer.insertBefore(newItem, document.getElementById("btn_agregar_item"));
-    });
+        
+        // Add the new item field to the items container
+        itemsContainer.appendChild(newItemDiv);
+    }
+    
+    function generateUniqueId() {
+        // Implement your own unique ID generation logic here, e.g., using timestamp or random number
+        return 'item-' + Date.now(); // Example: generates IDs like 'item-1624612345678'
+    }
 });
+

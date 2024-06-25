@@ -136,7 +136,7 @@ class CompQueries():
                                         "Order".finish_date,
                                         Status.id
                                     ORDER BY 
-                                        Status.id ASC;
+                                        "Order".creation_date ASC;
 
                                     """)
                 resultset = cursor.fetchall()

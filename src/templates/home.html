@@ -3,7 +3,6 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block customCSS %}
-<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
 <!-- Link to a Google Font (example) -->
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 {% endblock %}
@@ -11,45 +10,22 @@
 {% block body %}
 <main class="content">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <form action="submit_order.php" method="POST" id="order_form">
+    <form action="" method="POST" id="order_form">
         <fieldset>
             <legend>Datos del Cliente</legend>
-            <label for="cliente_nombre">Nombre del Cliente:</label>
-            <select id="cliente_nombre" name="cliente_nombre" required></select>
-            <button type="button" id="btn_extender">Extender formulario</button>
-            <div id="datos_cliente" style="display: none;">
-                <label for="cliente_nombre_completo">Nombre Completo:</label>
-                <input type="text" id="cliente_nombre_completo" name="cliente_nombre_completo">
-                <label for="cliente_direccion">Dirección:</label>
-                <input type="text" id="cliente_direccion" name="cliente_direccion">
-                <label for="cliente_telefono">Teléfono:</label>
-                <input type="text" id="cliente_telefono" name="cliente_telefono">
+            <div class="form-field">
+                <input type="text" id="cliente_nombre" placeholder="Buscar cliente...">
             </div>
+            <div id="autocomplete-list" class="autocomplete-suggestions"></div>
         </fieldset>
 
         <fieldset>
-            <legend>Lista de Items</legend>
-            <div class="item">
-                <label for="item">Item:</label>
-                <select id="item" name="item[]" required></select>
-                <label for="tipo_servicio">Tipo de Servicio:</label>
-                <select id="tipo_servicio" name="tipo_servicio[]" required></select>
-                <label for="color_principal">Color Principal:</label>
-                <select id="color_principal" name="color_principal[]" required></select>
-                <label for="color_secundario">Color Secundario:</label>
-                <select id="color_secundario" name="color_secundario[]"></select>
-                <label for="patron_tela">Patrón de Tela:</label>
-                <select id="patron_tela" name="patron_tela[]"></select>
-                <label for="tamano_objeto">Tamaño del Objeto:</label>
-                <select id="tamano_objeto" name="tamano_objeto[]"></select>
-                <label for="suavizante">Suavizante?</label>
-                <input type="checkbox" id="suavizante" name="suavizante[]" value="si">
-                <label for="indicaciones">Indicaciones adicionales:</label>
-                <input type="text" id="indicaciones" name="indicaciones[]">
-            </div>
-            <button type="button" id="btn_agregar_item">Agregar Item</button>
+            <legend>Formulario de Items</legend>
+            <div class="item"></div>
+            <!--boton para agregar un nuevo item-->
+            <button type="button" id="add-item">+</button>
         </fieldset>
-
+        
         <button type="submit">Registrar Orden</button>
     </form>
 </main>
