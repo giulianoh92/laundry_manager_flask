@@ -24,10 +24,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 })
                 .then(data => {
                     // Manejar la respuesta del servidor
-                    if (data === 0) {
-                        console.error('No se registró la operación.');
-                    } else if (isValidDate(data)) {
-                        console.log('Orden marcada como terminada:', data);
+                    if (data.success === true && data.finish_date) {
+                        console.log('Orden marcada como terminada:', data.finish_date);
                         // Recargar la página después de un segundo
                         setTimeout(() => {
                             location.reload();
@@ -91,3 +89,7 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 });
+
+function isValidDate(date) {
+    return date instanceof Date && !isNaN(date);
+}

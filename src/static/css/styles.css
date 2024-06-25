@@ -9,7 +9,7 @@ body {
 }
 
 header {
-    background-color: #343a40;
+    background-color: #234e79;
     color: #ffffff;
     padding: 20px;
     text-align: center;
@@ -118,3 +118,17 @@ table tbody tr:hover {
 .finish-button:active {
     background-color: #367C39; /* Color de fondo al presionar el botón */
 }
+
+.img-container {
+    display: flex;
+    justify-content: center;
+}
+
+.logout-container {
+    text-align: right;
+}
+
+.btn.btn-secondary {
+    color: #ffffff; /* Cambia esto al color claro que desees */
+}
+

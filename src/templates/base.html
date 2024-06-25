@@ -14,8 +14,10 @@
 
 <body class="text-center">
     <header>
-        <h1>Laundry Dashboard</h1>
-        <a class="btn btn-secondary" href="{{ url_for('logout') }}">Logout</a>
+        <h1>Panel de Administrador</h1>
+        <div class="logout-container">
+            <a class="btn btn-secondary" href="{{ url_for('logout') }}">Cerrar Sesión</a>
+        </div>
     </header>
     <div class="tab">
         <a class="tablinks" href="{{ url_for('home') }}">Inicio</a>

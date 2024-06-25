@@ -1,9 +1,13 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_wtf.csrf import CSRFProtect
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
-from models.OrderModel import OrderModel
 from models.ClientModel import ClientModel
 from models.UserModel import UserModel
+from models.ItemModel import ItemModel
+from models.ServiceModel import ServiceModel
+from models.ColorModel import ColorModel
+from models.SizeModel import SizeModel
+from models.PatternModel import PatternModel
 from models.entities.User import User
 from queries import CompQueries
 from config import config
@@ -70,10 +74,46 @@ def finish(id):
     print('py',id)
     try:
         result = CompQueries.finish(id)
-        print(result)
         return jsonify({'success': True, 'finish_date': result}), 200
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+    
+
+@app.route('/get_clients', methods=['GET'])
+@login_required
+def get_clients():
+    items = ClientModel.get_clients()
+    return jsonify(items)
+
+@app.route('/get_items', methods=['GET'])
+@login_required
+def get_items():
+    items = ItemModel.get_items()
+    return jsonify(items)
+
+@app.route('/get_services', methods=['GET'])
+@login_required
+def get_services():
+    services = ServiceModel.get_services()
+    return jsonify(services)
+
+@app.route('/get_colors', methods=['GET'])
+@login_required
+def get_colors():
+    colors = ColorModel.get_colors()
+    return jsonify(colors)
+
+@app.route('/get_patterns', methods=['GET'])
+@login_required
+def get_patterns():
+    patterns = PatternModel.get_patterns()
+    return jsonify(patterns)
+
+@app.route('/get_sizes', methods=['GET'])
+@login_required
+def get_sizes():
+    sizes = SizeModel.get_sizes()
+    return jsonify(sizes)
 
 
 def page_not_found(error):

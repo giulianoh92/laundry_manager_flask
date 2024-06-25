@@ -164,7 +164,7 @@ class CompQueries():
             connection.close()
             if affected_rows == 0:
                 raise Exception("Order not found")
-            return True
+            return current_date
             
         except Exception as ex:
             raise Exception(ex)
