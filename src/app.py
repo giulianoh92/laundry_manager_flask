@@ -4,11 +4,14 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from models.ClientModel import ClientModel
 from models.UserModel import UserModel
 from models.ItemModel import ItemModel
+from models.OrderModel import OrderModel
 from models.ServiceModel import ServiceModel
 from models.ColorModel import ColorModel
 from models.SizeModel import SizeModel
 from models.PatternModel import PatternModel
 from models.entities.User import User
+from models.entities.Client import Client
+from models.entities.Order import Order
 from queries import CompQueries
 from config import config
 
@@ -71,10 +74,38 @@ def order_details(id):
 @app.route('/finish/<int:id>', methods=['POST'])
 @login_required
 def finish(id):
-    print('py',id)
     try:
         result = CompQueries.finish(id)
         return jsonify({'success': True, 'finish_date': result}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+    
+@app.route('/register_order', methods=['POST'])
+@login_required
+def register_order():
+    try:
+        order = request.json()
+        order = Order(
+            id = order['id'],
+            client_id = order['client_id'],
+            status_id = order['status_id'],
+            total_cost = order['total_cost'],
+            creation_date = order['creation_date'],
+            finish_date = order['finish_date']
+        )
+        OrderModel.add_order(order)
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+    
+@app.route('/register_client', methods=['POST'])
+@login_required
+def register_client():
+    try:
+        client = request.json()
+        client = Client(client['name'], client['address'],client['phone_number'])
+        ClientModel.add_client(client)
+        return jsonify({'success': True}), 200
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
     
@@ -82,8 +113,14 @@ def finish(id):
 @app.route('/get_clients', methods=['GET'])
 @login_required
 def get_clients():
-    items = ClientModel.get_clients()
-    return jsonify(items)
+    clients = ClientModel.get_clients()
+    return jsonify(clients)
+
+@app.route('/get_client/<id>', methods=['GET'])
+@login_required
+def get_client(id):
+    client = ClientModel.get_client(id)
+    return jsonify(client)
 
 @app.route('/get_items', methods=['GET'])
 @login_required

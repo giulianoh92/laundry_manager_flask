@@ -164,5 +164,55 @@ document.addEventListener("DOMContentLoaded", function () {
         // Implement your own unique ID generation logic here, e.g., using timestamp or random number
         return 'item-' + Date.now(); // Example: generates IDs like 'item-1624612345678'
     }
+
+        const checkNameButton = document.getElementById('check-name');
+
+    checkNameButton.addEventListener('click', function () {
+        checkClientName();
+    });
+
+    // Función asincrónica para verificar si el nombre del cliente existe
+    async function checkClientName() {
+        // Obtener el valor del input del nombre del cliente y eliminar espacios en blanco al inicio y final
+        const clientName = document.getElementById('cliente_nombre').value.trim();
+
+        // Verificar si el input no está vacío
+        if (clientName.length > 0) {
+            try {
+                // Realizar una solicitud GET a la API para verificar si el cliente existe
+                const response = await fetch(`${endpoints.cliente_nombre}?query=${encodeURIComponent(clientName)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
+
+                // Verificar si la respuesta HTTP fue exitosa
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                // Parsear la respuesta JSON
+                const data = await response.json();
+
+                // Verificar si el cliente existe en los datos obtenidos
+                const clientExists = data.some(client => client.name.toLowerCase() === clientName.toLowerCase());
+
+                // Mostrar un mensaje al usuario sobre la existencia del cliente
+                if (clientExists) {
+                    alert('El cliente existe en la base de datos.');
+                } else {
+                    alert('El cliente no existe en la base de datos.');
+                }
+            } catch (error) {
+                // Capturar errores y mostrarlos en la consola del navegador
+                console.error('Error checking client name:', error);
+                alert('Ocurrió un error al verificar el nombre del cliente. Por favor, inténtelo de nuevo más tarde.');
+            }
+        } else {
+            alert('Por favor, ingrese un nombre de cliente.');
+        }
+    }
 });
 

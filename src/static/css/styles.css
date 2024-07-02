@@ -207,6 +207,10 @@ table tbody tr:hover {
     box-sizing: border-box; /* Asegura que el padding no afecte al ancho total */
 }
 
+#cliente_nombre{
+    width: 50%;
+}
+
 .form-field input[type="checkbox"] {
     margin-top: 8px;
 }
@@ -273,3 +277,4 @@ button:active, .button:active {
     background-color: #218838; /* Fondo verde oscuro */
     border-color: #218838; /* Borde verde oscuro */
 }
+
