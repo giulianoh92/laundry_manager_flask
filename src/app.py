@@ -44,6 +44,7 @@ def login():
     return render_template('auth/login.html')
 
 @app.route('/logout')
+@login_required
 def logout():
     logout_user()
     return redirect(url_for('login'))
@@ -84,7 +85,7 @@ def finish(id):
 @login_required
 def register_order():
     try:
-        order = request.json()
+        order = request.json
         order = Order(
             id = order['id'],
             client_id = order['client_id'],
@@ -102,18 +103,23 @@ def register_order():
 @login_required
 def register_client():
     try:
-        client = request.json()
-        client = Client(client['name'], client['address'],client['phone_number'])
+        client = request.json
+        client = Client(client['name'], client['address'], client['phone_number'])
         ClientModel.add_client(client)
         return jsonify({'success': True}), 200
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
+
     
 
 @app.route('/get_clients', methods=['GET'])
 @login_required
 def get_clients():
-    clients = ClientModel.get_clients()
+    query = request.args.get('query')
+    if query:
+        clients = CompQueries.get_clients_matching(query)
+    else:
+        clients = ClientModel.get_clients()
     return jsonify(clients)
 
 @app.route('/get_client/<id>', methods=['GET'])

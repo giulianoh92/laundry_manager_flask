@@ -14,10 +14,13 @@ class ClientModel():
                 for row in resultset:
                     client = Client(row[0], row[1], row[2], row[3])
                     clients.append(client.to_JSON())
-            connection.close()
-            return clients
         except Exception as ex:
             raise Exception(ex)
+        finally:
+            if connection:
+                connection.close()
+        
+        return clients
     
     @classmethod
     def get_client(self, id):
@@ -61,7 +64,7 @@ class ClientModel():
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                cursor.execute("DELETE FROM \"client\" WHERE id = %s",(client.id,))
+                cursor.execute("DELETE FROM Client WHERE id = %s",(client.id,))
 
                 affected_rows = cursor.rowcount
                 connection.commit()
@@ -76,7 +79,7 @@ class ClientModel():
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                cursor.execute("""UPDATE \"client\" SET name = %s, address = %s, phone_number = %s WHERE id = %s """,
+                cursor.execute("""UPDATE Client SET name = %s, address = %s, phone_number = %s WHERE id = %s """,
                                (client.name, client.address, client.phone_number, client.id))
                 affected_rows = cursor.rowcount
                 connection.commit()

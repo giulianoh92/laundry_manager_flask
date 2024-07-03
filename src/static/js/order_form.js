@@ -1,10 +1,5 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // Cuando el DOM está completamente cargado, se ejecuta esta función anónima
-
-    // Obtener el token CSRF de la meta etiqueta
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-
-    // Definir los endpoints para cada tipo de autocompletado
     const endpoints = {
         cliente_nombre: "/get_clients",
         item: "/get_items",
@@ -12,32 +7,35 @@ document.addEventListener("DOMContentLoaded", function () {
         color_principal: "/get_colors",
         color_secundario: "/get_colors",
         patron_tela: "/get_patterns",
-        tamano_objeto: "/get_sizes"
+        tamano_objeto: "/get_sizes",
+        register_client: "/register_client",
     };
 
-    // Obtener referencia al input de texto y al contenedor de sugerencias
+    // Obtener referencia a elementos del DOM
+
     const input = document.getElementById('cliente_nombre');
     const suggestionBox = document.getElementById('autocomplete-list');
+    const form = document.getElementById('order_form');
 
-    // Escuchar el evento de entrada (cuando el usuario escribe algo en el input)
-    input.addEventListener('input', function () {
-        // Obtener el valor actual del input y eliminar espacios en blanco al inicio y final
-        const query = this.value.trim();
-        
-        // Verificar si la consulta tiene al menos un caracter
+    // Initialize existing buttons
+    initializeButtons();
+
+    // Event listener for input of cliente_nombre for autocomplete
+    input.addEventListener('input', handleInput);
+
+    // Function to handle input event
+    function handleInput() {
+        const query = input.value.trim();
         if (query.length > 0) {
-            // Si la consulta tiene caracteres, llamar a la función para obtener sugerencias
             fetchSuggestions(query);
         } else {
-            // Si la consulta está vacía, vaciar el contenedor de sugerencias
             suggestionBox.innerHTML = '';
         }
-    });
+    }
 
-    // Función asincrónica para obtener sugerencias de la API
+    // Function to fetch suggestions asynchronously
     async function fetchSuggestions(query) {
         try {
-            // Realizar una solicitud GET a la API usando el endpoint correspondiente y pasando la consulta como parámetro
             const response = await fetch(`${endpoints.cliente_nombre}?query=${encodeURIComponent(query)}`, {
                 method: 'GET',
                 headers: {
@@ -45,71 +43,49 @@ document.addEventListener("DOMContentLoaded", function () {
                     'X-CSRF-TOKEN': csrfToken
                 }
             });
-            
-            // Verificar si la respuesta HTTP fue exitosa
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            
-            // Parsear la respuesta JSON
             const data = await response.json();
-            
-            // Mostrar las sugerencias obtenidas
-            showSuggestions(data, query); // Pasamos la consulta actual como parámetro adicional
+            showSuggestions(data, query);
         } catch (error) {
-            // Capturar errores y mostrarlos en la consola del navegador
             console.error('Error fetching suggestions:', error);
         }
     }
 
-    // Función para mostrar las sugerencias filtradas
+    // Function to show filtered suggestions
     function showSuggestions(suggestions, query) {
-        // Limpiar el contenedor de sugerencias antes de agregar nuevas sugerencias
         suggestionBox.innerHTML = '';
-        
-        // Iterar sobre cada sugerencia recibida de la API
         suggestions.forEach(suggestion => {
-            // Convertir el nombre de la sugerencia y la consulta actual a minúsculas para comparar
             const suggestionName = suggestion.name.toLowerCase();
             const queryLower = query.toLowerCase();
-            
-            // Verificar si el nombre de la sugerencia contiene la consulta actual
             if (suggestionName.includes(queryLower)) {
-                // Si la sugerencia coincide, crear un elemento div para mostrarla
                 const div = document.createElement('div');
                 div.classList.add('autocomplete-suggestion');
-                div.textContent = suggestion.name; // Mostrar el nombre de la sugerencia
-                
-                // Agregar un evento click para seleccionar la sugerencia y llenar el input con su nombre
+                div.textContent = suggestion.name;
                 div.addEventListener('click', function () {
                     input.value = suggestion.name;
-                    suggestionBox.innerHTML = ''; // Vaciar el contenedor de sugerencias después de seleccionar una
+                    suggestionBox.innerHTML = '';
                 });
-                
-                // Agregar el div creado al contenedor de sugerencias
                 suggestionBox.appendChild(div);
             }
         });
     }
 
-    const addItemButton = document.getElementById('add-item');
-    const form = document.getElementById('order_form');
-    
-    // Agregar evento al botón de agregar item
-    addItemButton.addEventListener('click', function () {
-        addNewItemField();
-    });
-    
+    // Function to initialize existing buttons and listeners
+    function initializeButtons() {
+        const addItemButton = document.getElementById('add-item');
+        const checkNameButton = document.getElementById('check-name');
+        addItemButton.addEventListener('click', addNewItemField);
+        checkNameButton.addEventListener('click', handleCheckName);
+    }
+
     // Función para agregar un nuevo campo de item
     function addNewItemField() {
         const itemsContainer = document.querySelector('.item');
         const newItemDiv = document.createElement('div');
         newItemDiv.classList.add('item');
-        
-        // Generate a unique ID for the new item
-        const itemId = generateUniqueId(); // Implement your own function to generate unique IDs
-        
-        // HTML for the new item field
+        const itemId = generateUniqueId();
         newItemDiv.innerHTML = `
                         <div class="item-box">
                             <div class="form-field">
@@ -148,38 +124,135 @@ document.addEventListener("DOMContentLoaded", function () {
                                 <button type="button" class="delete-item">-</button>
                             </div>
                         </div>
-                        `;
-        
-        // Button to delete the new item field
+        `;
         const deleteButton = newItemDiv.querySelector('.delete-item');
         deleteButton.addEventListener('click', function () {
             newItemDiv.remove();
         });
-        
-        // Add the new item field to the items container
         itemsContainer.appendChild(newItemDiv);
+        loadOptions(endpoints.item, `${itemId}-item`);
+        loadOptions(endpoints.tipo_servicio, `${itemId}-tipo_servicio`);
+        loadOptions(endpoints.color_principal, `${itemId}-color_principal`);
+        loadOptions(endpoints.color_secundario, `${itemId}-color_secundario`);
+        loadOptions(endpoints.patron_tela, `${itemId}-patron_tela`);
+        loadOptions(endpoints.tamano_objeto, `${itemId}-tamano_objeto`);
     }
-    
+
+    // Función para cargar opciones en un select desde un endpoint
+    async function loadOptions(endpoint, selectId) {
+        try {
+            const response = await fetch(endpoint);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            const select = document.getElementById(selectId);
+            
+            // Limpiar opciones actuales del select
+            select.innerHTML = '';
+            
+            // Agregar opción vacía como elemento inicial
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Seleccione una opción'; // Texto opcional para la opción vacía
+            select.appendChild(defaultOption);
+            
+            // Agregar las opciones recibidas del endpoint
+            data.forEach(option => {
+                const optionElement = document.createElement('option');
+                optionElement.value = option.id;
+                optionElement.textContent = option.name || option.description;
+                select.appendChild(optionElement);
+            });
+        } catch (error) {
+            console.error(`Error loading options from ${endpoint}:`, error);
+        }
+    }
+
+    // Function to generate a unique ID
     function generateUniqueId() {
-        // Implement your own unique ID generation logic here, e.g., using timestamp or random number
-        return 'item-' + Date.now(); // Example: generates IDs like 'item-1624612345678'
+        return 'item-' + Date.now();
     }
 
-        const checkNameButton = document.getElementById('check-name');
+    // Function to handle checking client name
+    async function handleCheckName() {
+        let id = await checkClientName();
+        console.log('Client ID:', id);
+        if (id == null) {
+            addClientRegisterField();
+        }
+    }
 
-    checkNameButton.addEventListener('click', function () {
-        checkClientName();
-    });
+    // Función para agregar un nuevo campo de registro de cliente
+    function addClientRegisterField() {
+        const itemsContainer = document.querySelector('.client-det');
+        const newItemDiv = document.createElement('div');
+        newItemDiv.classList.add('item');
+        const itemId = generateUniqueId();
+        newItemDiv.innerHTML = `
+            <div class="item-box">
+                <div class="form-field">
+                    <label for="${itemId}-address">Dirección:</label>
+                    <input type="text" id="${itemId}-address" name="address[]">
+                </div>
+                <div class="form-field">
+                    <label for="${itemId}-phone_number">Número de teléfono:</label>
+                    <input type="text" id="${itemId}-phone_number" name="phone_number[]">
+                </div>
+   
+                <!-- Botón para registrar el cliente -->
+                <button id="register-client">Registrar Cliente</button>
+            </div>
+        `;
+        itemsContainer.appendChild(newItemDiv);
+
+        // Initialize the new button
+        const registerNewClientButton = newItemDiv.querySelector('#register-client');
+        registerNewClientButton.addEventListener('click', registerNewClient);
+    }
+
+    // Función para registrar un nuevo cliente
+    function registerNewClient() {
+        let name = document.getElementById('cliente_nombre').value;
+        let address = document.getElementById('address').value;
+        let phone_number = document.getElementById('phone_number').value;
+        //`${endpoints.register_client}`
+        console.log(endpoints.register_client)
+        console.log(name, address, phone_number)
+        /*
+        fetch('/register_client', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify({
+                name: name,
+                address: address,
+                phone_number: phone_number
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            if (data.success) {
+                alert('Cliente registrado correctamente');
+                //window.location.href = '/clients';
+            } else {
+                alert('Error al registrar cliente: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error al registrar cliente:', error);
+        });
+        */
+    }
 
     // Función asincrónica para verificar si el nombre del cliente existe
     async function checkClientName() {
-        // Obtener el valor del input del nombre del cliente y eliminar espacios en blanco al inicio y final
-        const clientName = document.getElementById('cliente_nombre').value.trim();
-
-        // Verificar si el input no está vacío
+        const clientName = input.value.trim();
         if (clientName.length > 0) {
             try {
-                // Realizar una solicitud GET a la API para verificar si el cliente existe
                 const response = await fetch(`${endpoints.cliente_nombre}?query=${encodeURIComponent(clientName)}`, {
                     method: 'GET',
                     headers: {
@@ -187,32 +260,23 @@ document.addEventListener("DOMContentLoaded", function () {
                         'X-CSRF-TOKEN': csrfToken
                     }
                 });
-
-                // Verificar si la respuesta HTTP fue exitosa
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-
-                // Parsear la respuesta JSON
                 const data = await response.json();
-
-                // Verificar si el cliente existe en los datos obtenidos
-                const clientExists = data.some(client => client.name.toLowerCase() === clientName.toLowerCase());
-
-                // Mostrar un mensaje al usuario sobre la existencia del cliente
-                if (clientExists) {
-                    alert('El cliente existe en la base de datos.');
+                const client = data.find(client => client.name.toLowerCase() === clientName.toLowerCase());
+                if (client) {
+                    return client.id;
                 } else {
-                    alert('El cliente no existe en la base de datos.');
+                    return null;
                 }
             } catch (error) {
-                // Capturar errores y mostrarlos en la consola del navegador
                 console.error('Error checking client name:', error);
                 alert('Ocurrió un error al verificar el nombre del cliente. Por favor, inténtelo de nuevo más tarde.');
             }
         } else {
             alert('Por favor, ingrese un nombre de cliente.');
+            return -1;
         }
     }
 });
-

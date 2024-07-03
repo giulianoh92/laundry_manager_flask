@@ -168,3 +168,25 @@ class CompQueries():
             
         except Exception as ex:
             raise Exception(ex)
+        
+    @classmethod
+    def get_clients_matching(cls, query):
+        print('hola')
+        try:
+            connection = get_connection()
+            clients = []
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT id, name FROM Client WHERE name LIKE %s", ('%' + query + '%',))
+                resultset = cursor.fetchall()
+                for row in resultset:
+                    clients.append({
+                        'id': row[0],
+                        'name': row[1]
+                    })
+        except Exception as ex:
+            raise Exception(ex)
+        finally:
+            if connection:
+                connection.close()
+        
+        return clients
