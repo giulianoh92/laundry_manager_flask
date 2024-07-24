@@ -9,7 +9,7 @@ class ClientModel():
             connection = get_connection()
             clients = []
             with connection.cursor() as cursor:
-                cursor.execute("SELECT client_id, full_name, address, phone_number FROM clients")
+                cursor.execute("SELECT client_id, full_name, address, phone_number FROM clients LIMIT 5")
                 resultset = cursor.fetchall()
                 for row in resultset:
                     client = Client(row[0], row[1], row[2], row[3])
@@ -40,22 +40,26 @@ class ClientModel():
             raise Exception(ex)
         
     @classmethod
-    def add_client(self, client):
+    def add_client(cls, client):
         try:
-            print("hola no se que hago")
+            print("Attempting to connect to the database...")
             connection = get_connection()
+            print("Connection established.")
             with connection.cursor() as cursor:
+                print("Executing insert query...")
                 cursor.execute(
                     """INSERT INTO clients (full_name, address, phone_number) 
-                    VALUES (%s, %s, %s) RETURNING id""",
+                    VALUES (%s, %s, %s) RETURNING client_id""",
                     (client.full_name, client.address, client.phone_number)
                 )
-                client.id = cursor.fetchone()[0]
+                client.client_id = cursor.fetchone()[0]
                 affected_rows = cursor.rowcount
-                print(affected_rows, client.id)
+                print(f"Affected rows: {affected_rows}, Client ID: {client.client_id}")
                 connection.commit()
             connection.close()
+            print("Connection closed.")
         except Exception as ex:
+            print(f"An error occurred: {ex}")
             raise Exception(ex)
 
         

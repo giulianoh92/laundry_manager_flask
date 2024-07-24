@@ -10,15 +10,27 @@ document.addEventListener("DOMContentLoaded", function () {
         tamano_objeto: "/get_sizes",
         register_client: "/register_client",
     };
-
+    let id;
+    const form = document.querySelector('order_form');
     const input = document.getElementById('cliente_nombre');
     const suggestionBox = document.getElementById('autocomplete-list');
-    const form = document.getElementById('order_form');
     const checkNameButton = document.getElementById('check-name');
-    checkNameButton.addEventListener('click', handleCheckName);
+    const label = document.getElementsByClassName('form-label');
+    const legend = document.getElementsByTagName('legend');
+
 
     // Event listener para input de cliente_nombre para autocompletado de nombres similares
     input.addEventListener('input', handleInput);
+
+    function handleEnterKey(event) {
+        if (event.key === 'Enter') {
+          event.preventDefault(); // Optional: prevent the default action if needed
+          checkNameButton.click(); // Trigger a click on the button
+        }
+      }
+  
+    input.addEventListener('keydown', handleEnterKey);
+    checkNameButton.addEventListener('click', handleCheckName);
 
     // funcion para manejar el input
     function handleInput() {
@@ -55,7 +67,6 @@ document.addEventListener("DOMContentLoaded", function () {
     function showSuggestions(suggestions, query) {
         suggestionBox.innerHTML = '';
         suggestions.forEach(suggestion => {
-            console.log(suggestion);
             const suggestionName = suggestion.full_name.toLowerCase();
             const queryLower = query.toLowerCase();
             if (suggestionName.includes(queryLower)) {
@@ -73,10 +84,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Función para verificar la existencia del cliente ingresado
     async function handleCheckName() {
-        let id = await checkClientName();
-        console.log('Client ID:', id);
+        id = await checkClientName();
         if (id == null) {
             addClientRegisterField();
+        }else{
+            input.disabled = true;
+            checkNameButton.disabled = true;
+            checkNameButton.style.backgroundColor = '#b2ff59';
+            checkNameButton.style.color = '#000000';
+            generateOrderForm();
         }
     }
 
@@ -168,7 +184,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(data => {
             if (data.success) {
                 alert('Cliente registrado con éxito.');
-                window.location.href = 'index.html';
+                window.location.href = 'home';
             } else {
                 alert('Ocurrió un error al registrar el cliente. Por favor, inténtelo de nuevo más tarde.');
             }
@@ -179,74 +195,131 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
+    function generateOrderForm() {
+        setTimeout(() => {
+            input.remove();
+            checkNameButton.remove();
+            label[0].remove();
+            suggestionBox.remove();
+            addNewItemField();
+        }, 1000);
 
-    /*
-    initializeButtons();
-    
-    function initializeButtons() {
-        //const addItemButton = document.getElementById('add-item');
-        const checkNameButton = document.getElementById('check-name');
-        //addItemButton.addEventListener('click', addNewItemField);
-        checkNameButton.addEventListener('click', handleCheckName);
     }
-        */
-    /*
+    
     // Función para agregar un nuevo campo de item
     function addNewItemField() {
         const itemsContainer = document.querySelector('.item');
-        const newItemDiv = document.createElement('div');
-        newItemDiv.classList.add('item');
+        const newItemDiv = document.createElement('div'); // Cambio aquí para 'div' en lugar de 'form-group'
         const itemId = generateUniqueId();
         newItemDiv.innerHTML = `
-                        <div class="item-box border p-3 mb-3">
-                            <div class="form-group">
-                                <label for="${itemId}-item">Item:</label>
-                                <select id="${itemId}-item" name="item[]" class="form-control" required></select>
-                            </div>
-                            <div class="form-group">
-                                <label for="${itemId}-tipo_servicio">Tipo de Servicio:</label>
-                                <select id="${itemId}-tipo_servicio" name="tipo_servicio[]" class="form-control" required></select>
-                            </div>
-                            <div class="form-group">
-                                <label for="${itemId}-color_principal">Color Principal:</label>
-                                <select id="${itemId}-color_principal" name="color_principal[]" class="form-control" required></select>
-                            </div>
-                            <div class="form-group">
-                                <label for="${itemId}-color_secundario">Color Secundario:</label>
-                                <select id="${itemId}-color_secundario" name="color_secundario[]" class="form-control"></select>
-                            </div>
-                            <div class="form-group">
-                                <label for="${itemId}-patron_tela">Patrón de Tela:</label>
-                                <select id="${itemId}-patron_tela" name="patron_tela[]" class="form-control"></select>
-                            </div>
-                            <div class="form-group">
-                                <label for="${itemId}-tamano_objeto">Tamaño del Objeto:</label>
-                                <select id="${itemId}-tamano_objeto" name="tamano_objeto[]" class="form-control"></select>
-                            </div>
-                            <div class="form-group form-check">
-                                <label class="form-check-label" for="${itemId}-suavizante">Suavizante?</label>
-                                <input type="checkbox" id="${itemId}-suavizante" name="suavizante[]" class="form-check-input" value="si">
-                            </div>
-                            <div class="form-group">
-                                <label for="${itemId}-indicaciones">Indicaciones adicionales:</label>
-                                <input type="text" id="${itemId}-indicaciones" name="indicaciones[]" class="form-control">
-                            </div>
-                            <div class="form-group">
-                                <button type="button" class="delete-item btn btn-danger">-</button>
-                            </div>
-                        </div>
+            <div class="item-box border p-3 mb-3">
+                <div class="form-group">
+                    <label for="${itemId}-item">Item:</label>
+                    <select id="${itemId}-item" name="item[]" class="form-control" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="${itemId}-tipo_servicio">Tipo de Servicio:</label>
+                    <select id="${itemId}-tipo_servicio" name="tipo_servicio[]" class="form-control" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="${itemId}-color_principal">Color Principal:</label>
+                    <select id="${itemId}-color_principal" name="color_principal[]" class="form-control" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="${itemId}-color_secundario">Color Secundario:</label>
+                    <select id="${itemId}-color_secundario" name="color_secundario[]" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label for="${itemId}-patron_tela">Patrón de Tela:</label>
+                    <select id="${itemId}-patron_tela" name="patron_tela[]" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label for="${itemId}-tamano_objeto">Tamaño del Objeto:</label>
+                    <select id="${itemId}-tamano_objeto" name="tamano_objeto[]" class="form-control" required></select>
+                </div>
+                <div class="form-group">
+                    <label for="${itemId}-suavizante">Suavizante?:</label>
+                    <select id="${itemId}-suavizante" name="suavizante[]" class="form-control" values>
+                        <option value=false>No</option>
+                        <option value=true>Si</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="${itemId}-indicaciones">Indicaciones adicionales:</label>
+                    <input type="text" id="${itemId}-indicaciones" name="indicaciones[]" class="form-control">
+                </div>
+                <div class="form-group">
+                    <button type="button" class="delete-item btn btn-danger">-</button>
+                </div>
+            </div>
+
         `;
         const deleteButton = newItemDiv.querySelector('.delete-item');
         deleteButton.addEventListener('click', function () {
             newItemDiv.remove();
         });
         itemsContainer.appendChild(newItemDiv);
+        const registerButton = document.getElementById('register-button');
+        if(registerButton){
+            registerButton.remove();
+        }
+        const registerButtonDiv = document.createElement('div');
+        registerButtonDiv.innerHTML = `
+        <button type="button" class="btn btn-primary" id="register-button">Registrar</button>
+        `;
+        itemsContainer.appendChild(registerButtonDiv);
+        const registerButtonElement = document.getElementById('register-button');
+        let orderData = [];
+        orderData.push(id);
+        registerButtonElement.addEventListener('click', function () {
+            const items = document.querySelectorAll('.item-box');
+            items.forEach(item => {
+                const control = item.querySelectorAll('.form-control, .form-check-input');
+                const elementData = {
+                    item_id: control[0].value === '' ? null : control[0].value,
+                    service_id: control[1].value === '' ? null : control[1].value,
+                    maincolor_id: control[2].value === '' ? null : control[2].value,
+                    othercolor_id: control[3].value === '' ? null : control[3].value,
+                    pattern_id: control[4].value === '' ? null : control[4].value,
+                    size_id: control[5].value === '' ? null : control[5].value,
+                    softener: control[6].value === '' ? null : control[6].value,
+                    indications: control[7].value === '' ? null : control[7].value
+                };
+                orderData.push(elementData);
+            });
+            console.log(orderData);
+        });
+
+        const addItemButton = document.querySelector('#add-item-button');
+        if (addItemButton){
+            addItemButton.remove();
+        }
+        //
+
+        // Cargar opciones para los campos de selección
         loadOptions(endpoints.item, `${itemId}-item`);
         loadOptions(endpoints.tipo_servicio, `${itemId}-tipo_servicio`);
         loadOptions(endpoints.color_principal, `${itemId}-color_principal`);
         loadOptions(endpoints.color_secundario, `${itemId}-color_secundario`);
         loadOptions(endpoints.patron_tela, `${itemId}-patron_tela`);
         loadOptions(endpoints.tamano_objeto, `${itemId}-tamano_objeto`);
+
+        addAddItemButton();
+    }
+
+    // Función para agregar el botón verde
+    function addAddItemButton() {
+        const itemsContainer = document.querySelector('.item');
+        const addButtonDiv = document.createElement('div');
+        addButtonDiv.innerHTML = `
+            <div class="form-group">
+                <button type="button" id="add-item-button" class="btn btn-success">Agregar otro item</button>
+            </div>
+        `;
+        itemsContainer.appendChild(addButtonDiv);
+
+        const addItemButton = addButtonDiv.querySelector('#add-item-button');
+        addItemButton.addEventListener('click', addNewItemField);
     }
 
     // Función para cargar opciones en un select desde un endpoint
@@ -284,5 +357,4 @@ document.addEventListener("DOMContentLoaded", function () {
     function generateUniqueId() {
         return 'item-' + Date.now();
     }
-    */
 });

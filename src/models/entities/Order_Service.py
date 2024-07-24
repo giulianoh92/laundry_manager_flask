@@ -1,8 +1,8 @@
 
 
 class Order_Service():
-    def __init__(self, id, order_id, item_id, service_id, maincolor_id, othercolor_id, pattern_id, size_id, softener, indications):
-        self.id = id
+    def __init__(self, os_id, order_id, item_id, service_id, maincolor_id, othercolor_id, pattern_id, size_id, softener, indications):
+        self.os_id = os_id
         self.order_id = order_id
         self.item_id = item_id
         self.service_id = service_id
@@ -15,7 +15,7 @@ class Order_Service():
 
     def to_JSON(self):
         return {
-            "id": self.id,
+            "os_id": self.os_id,
             "order_id": self.order_id,
             "item_id": self.item_id,
             "service_id": self.service_id,

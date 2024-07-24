@@ -101,14 +101,9 @@ def register_order():
 @app.route('/register_client', methods=['POST'])
 @login_required
 def register_client():
-    print('reg_cli')
     try:
         client_data = request.json
-        print("Client_data:", client_data)
         client = Client('', client_data['full_name'], client_data['address'], client_data['phone_number'])
-        print(client.full_name)
-        print(client.address)
-        print(client.phone_number)
         ClientModel.add_client(client)
         return jsonify({'success': True}), 200
     except Exception as e:

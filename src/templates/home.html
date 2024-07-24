@@ -11,8 +11,8 @@
 <main class="content container mt-4">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <form id="order_form" class="needs-validation" novalidate>
-        <fieldset class="border p-4 mb-4">
-            <legend class="w-auto px-2">Datos del Cliente</legend>
+        <fieldset class="item border p-4 mb-4">
+            <legend class="w-auto px-2">Registrar nuevo pedido</legend>
             <div class="form-group">
                 <label for="cliente_nombre" class="form-label">Nombre del Cliente</label>
                 <div class="input-group">
@@ -26,15 +26,7 @@
             </div>
             
         </fieldset>
-        <!--
-        <fieldset class="border p-4 mb-4">
-            <legend class="w-auto px-2">Formulario de Items</legend>
-            <div class="item mb-3"></div>
-            <button type="button" id="add-item" class="btn btn-success">+</button>
-        </fieldset>
-        
-        <button id="submit" class="btn btn-primary">Registrar Orden</button>
-        -->
+
     </form>
 </main>
 

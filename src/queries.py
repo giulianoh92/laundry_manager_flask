@@ -136,7 +136,8 @@ class CompQueries():
                                         f_date,
                                         st.status_id
                                     ORDER BY 
-                                        c_date ASC;
+                                        c_date ASC
+                                    LIMIT 10;
 
                                     """)
                 resultset = cursor.fetchall()
@@ -175,7 +176,7 @@ class CompQueries():
             connection = get_connection()
             clients = []
             with connection.cursor() as cursor:
-                cursor.execute("SELECT client_id, full_name FROM clients WHERE full_name ILIKE %s", ('%' + query + '%',))
+                cursor.execute("SELECT client_id, full_name FROM clients WHERE full_name ILIKE %s LIMIT 5", ('%' + query + '%',))
                 resultset = cursor.fetchall()
                 for row in resultset:
                     clients.append({
