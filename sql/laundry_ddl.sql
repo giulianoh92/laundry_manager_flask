@@ -20,8 +20,7 @@ CREATE TABLE users (
 
 CREATE TABLE clients (
     client_id SERIAL PRIMARY KEY,
-    first_name VARCHAR(50),
-    last_name VARCHAR(50),
+    full_name VARCHAR(50),
     address VARCHAR(255),
     phone_number VARCHAR(20)
 );

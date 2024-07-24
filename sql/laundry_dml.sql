@@ -5,9 +5,9 @@ INSERT INTO users (password, username, email) VALUES
     ('','dev','');
 
 -- Insertar datos de prueba en la tabla clients
-INSERT INTO clients (first_name, last_name, address, phone_number) VALUES
-    ('Juan', 'Pérez', 'Calle Principal 123', '123456789'),
-    ('María', 'Gómez', 'Avenida Central 456', '987654321');
+INSERT INTO clients (full_name, address, phone_number) VALUES
+    ('Juan Pérez', 'Calle Principal 123', '123456789'),
+    ('María Gómez', 'Avenida Central 456', '987654321');
 
 -- Insertar datos de prueba en la tabla statuses
 INSERT INTO statuses (description) VALUES
