@@ -11,32 +11,16 @@ document.addEventListener("DOMContentLoaded", function () {
         register_client: "/register_client",
     };
 
-    // Obtener referencia a elementos del DOM
-
     const input = document.getElementById('cliente_nombre');
     const suggestionBox = document.getElementById('autocomplete-list');
     const form = document.getElementById('order_form');
-    const submit = document.getElementById('submit');
+    const checkNameButton = document.getElementById('check-name');
+    checkNameButton.addEventListener('click', handleCheckName);
 
-    submit.addEventListener('click', () => {
-        const items = document.getElementsByClassName('form-field');
-        let data = {};
-        for (let i = 0; i < items.length; i++) {
-            const item = items[i];
-            const name = item.getAttribute('name');
-            const value = item.value;
-            data[name] = value;
-        }
-        console.log(data);
-    })
-
-    // Initialize existing buttons
-    initializeButtons();
-
-    // Event listener for input of cliente_nombre for autocomplete
+    // Event listener para input de cliente_nombre para autocompletado de nombres similares
     input.addEventListener('input', handleInput);
 
-    // Function to handle input event
+    // funcion para manejar el input
     function handleInput() {
         const query = input.value.trim();
         if (query.length > 0) {
@@ -46,9 +30,10 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Function to fetch suggestions asynchronously
+    // Funcion para obtener sugerencias de nombres de clientes registrados
     async function fetchSuggestions(query) {
         try {
+            //peticion HTTP POST para traer los nombres de clientes matching (query)
             const response = await fetch(`${endpoints.cliente_nombre}?query=${encodeURIComponent(query)}`, {
                 method: 'GET',
                 headers: {
@@ -60,13 +45,13 @@ document.addEventListener("DOMContentLoaded", function () {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
-            showSuggestions(data, query);
+            showSuggestions(data, query); // mostrar resultados
         } catch (error) {
             console.error('Error fetching suggestions:', error);
         }
     }
 
-    // Function to show filtered suggestions
+    // Mostrar las sugerencias obtenidas
     function showSuggestions(suggestions, query) {
         suggestionBox.innerHTML = '';
         suggestions.forEach(suggestion => {
@@ -86,14 +71,126 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Function to initialize existing buttons and listeners
-    function initializeButtons() {
-        const addItemButton = document.getElementById('add-item');
-        const checkNameButton = document.getElementById('check-name');
-        addItemButton.addEventListener('click', addNewItemField);
-        checkNameButton.addEventListener('click', handleCheckName);
+    // Función para verificar la existencia del cliente ingresado
+    async function handleCheckName() {
+        let id = await checkClientName();
+        console.log('Client ID:', id);
+        if (id == null) {
+            addClientRegisterField();
+        }
     }
 
+    // Función para agregar un nuevo campo de registro de cliente
+    function addClientRegisterField() {
+        const itemsContainer = document.querySelector('.client-det');
+
+        // Verificar si ya existe un campo de registro de cliente
+        if (!itemsContainer.querySelector('.item')) {
+            const newItemDiv = document.createElement('div');
+            newItemDiv.classList.add('item');
+            newItemDiv.innerHTML = ` 
+                <div class="item-box border p-3 mb-3">
+                    <div class="form-group">
+                        <label for="address">Dirección:</label>
+                        <input type="text" id="address" name="address[]" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone_number">Número de teléfono:</label>
+                        <input type="text" id="phone_number" name="phone_number[]" class="form-control" required>
+                    </div>
+                    <!-- Botón para registrar el cliente -->
+                    <button type="button" class="register-client btn btn-primary">Registrar Cliente</button>
+                </div>
+            `;
+            itemsContainer.appendChild(newItemDiv);
+            
+            // Inicializar el nuevo botón
+            const registerNewClientButton = newItemDiv.querySelector('.register-client');
+            registerNewClientButton.addEventListener('click', registerNewClient);
+        }
+        
+    }
+
+    // Función asincrónica para verificar si el nombre del cliente existe
+    async function checkClientName() {
+        const clientName = input.value.trim();
+        if (clientName.length > 0) {
+            try {
+                const response = await fetch(`${endpoints.cliente_nombre}?query=${encodeURIComponent(clientName)}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+                let client;
+                if (data.length > 0 && data[0].full_name === clientName) {
+                    client = data[0];
+                }
+                if (client) {
+                    return client.client_id;
+                } else {
+                    return null;
+                }
+            } catch (error) {
+                console.error('Error checking client name:', error);
+                alert('Ocurrió un error al verificar el nombre del cliente. Por favor, inténtelo de nuevo más tarde.');
+            }
+        } else {
+            alert('Por favor, ingrese un nombre de cliente.');
+            return -1;
+        }
+    }
+
+    // Función para registrar un nuevo cliente
+    function registerNewClient() {
+        let name = document.getElementById('cliente_nombre').value;
+        let address = document.getElementById('address').value;
+        let phone_number = document.getElementById('phone_number').value;
+    
+        fetch(`${endpoints.register_client}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify({
+                full_name: name,
+                address: address,
+                phone_number: phone_number
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Cliente registrado con éxito.');
+                window.location.href = 'index.html';
+            } else {
+                alert('Ocurrió un error al registrar el cliente. Por favor, inténtelo de nuevo más tarde.');
+            }
+        })
+        .catch(error => {
+            console.error('Error registering new client:', error);
+            alert('Ocurrió un error al registrar el cliente. Por favor, inténtelo de nuevo más tarde.');
+        });
+    }
+
+
+    /*
+    initializeButtons();
+    
+    function initializeButtons() {
+        //const addItemButton = document.getElementById('add-item');
+        const checkNameButton = document.getElementById('check-name');
+        //addItemButton.addEventListener('click', addNewItemField);
+        checkNameButton.addEventListener('click', handleCheckName);
+    }
+        */
+    /*
     // Función para agregar un nuevo campo de item
     function addNewItemField() {
         const itemsContainer = document.querySelector('.item');
@@ -101,41 +198,41 @@ document.addEventListener("DOMContentLoaded", function () {
         newItemDiv.classList.add('item');
         const itemId = generateUniqueId();
         newItemDiv.innerHTML = `
-                        <div class="item-box">
-                            <div class="form-field">
+                        <div class="item-box border p-3 mb-3">
+                            <div class="form-group">
                                 <label for="${itemId}-item">Item:</label>
-                                <select id="${itemId}-item" name="item[]" required></select>
+                                <select id="${itemId}-item" name="item[]" class="form-control" required></select>
                             </div>
-                            <div class="form-field">
+                            <div class="form-group">
                                 <label for="${itemId}-tipo_servicio">Tipo de Servicio:</label>
-                                <select id="${itemId}-tipo_servicio" name="tipo_servicio[]" required></select>
+                                <select id="${itemId}-tipo_servicio" name="tipo_servicio[]" class="form-control" required></select>
                             </div>
-                            <div class="form-field">
+                            <div class="form-group">
                                 <label for="${itemId}-color_principal">Color Principal:</label>
-                                <select id="${itemId}-color_principal" name="color_principal[]" required></select>
+                                <select id="${itemId}-color_principal" name="color_principal[]" class="form-control" required></select>
                             </div>
-                            <div class="form-field">
+                            <div class="form-group">
                                 <label for="${itemId}-color_secundario">Color Secundario:</label>
-                                <select id="${itemId}-color_secundario" name="color_secundario[]"></select>
+                                <select id="${itemId}-color_secundario" name="color_secundario[]" class="form-control"></select>
                             </div>
-                            <div class="form-field">
+                            <div class="form-group">
                                 <label for="${itemId}-patron_tela">Patrón de Tela:</label>
-                                <select id="${itemId}-patron_tela" name="patron_tela[]"></select>
+                                <select id="${itemId}-patron_tela" name="patron_tela[]" class="form-control"></select>
                             </div>
-                            <div class="form-field">
+                            <div class="form-group">
                                 <label for="${itemId}-tamano_objeto">Tamaño del Objeto:</label>
-                                <select id="${itemId}-tamano_objeto" name="tamano_objeto[]"></select>
+                                <select id="${itemId}-tamano_objeto" name="tamano_objeto[]" class="form-control"></select>
                             </div>
-                            <div class="form-field">
-                                <label for="${itemId}-suavizante">Suavizante?</label>
-                                <input type="checkbox" id="${itemId}-suavizante" name="suavizante[]" value="si">
+                            <div class="form-group form-check">
+                                <label class="form-check-label" for="${itemId}-suavizante">Suavizante?</label>
+                                <input type="checkbox" id="${itemId}-suavizante" name="suavizante[]" class="form-check-input" value="si">
                             </div>
-                            <div class="form-field">
+                            <div class="form-group">
                                 <label for="${itemId}-indicaciones">Indicaciones adicionales:</label>
-                                <input type="text" id="${itemId}-indicaciones" name="indicaciones[]">
+                                <input type="text" id="${itemId}-indicaciones" name="indicaciones[]" class="form-control">
                             </div>
-                            <div class="form-field">
-                                <button type="button" class="delete-item">-</button>
+                            <div class="form-group">
+                                <button type="button" class="delete-item btn btn-danger">-</button>
                             </div>
                         </div>
         `;
@@ -187,86 +284,5 @@ document.addEventListener("DOMContentLoaded", function () {
     function generateUniqueId() {
         return 'item-' + Date.now();
     }
-
-    // Function to handle checking client name
-    async function handleCheckName() {
-        let id = await checkClientName();
-        console.log('Client ID:', id);
-        if (id == null) {
-            addClientRegisterField();
-        }
-    }
-
-    // Función para agregar un nuevo campo de registro de cliente
-    function addClientRegisterField() {
-        const itemsContainer = document.querySelector('.client-det');
-        const newItemDiv = document.createElement('div');
-        newItemDiv.classList.add('item');
-        const itemId = generateUniqueId();
-        newItemDiv.innerHTML = `
-            <div class="item-box">
-                <div class="form-field">
-                    <label for="${itemId}-address">Dirección:</label>
-                    <input type="text" id="${itemId}-address" name="address[]">
-                </div>
-                <div class="form-field">
-                    <label for="${itemId}-phone_number">Número de teléfono:</label>
-                    <input type="text" id="${itemId}-phone_number" name="phone_number[]">
-                </div>
-                <!-- Botón para registrar el cliente -->
-                <button class="register-client">Registrar Cliente</button>
-            </div>
-        `;
-        itemsContainer.appendChild(newItemDiv);
-    
-        // Initialize the new button
-        const registerNewClientButton = newItemDiv.querySelector('.register-client');
-        registerNewClientButton.addEventListener('click', registerNewClient);
-    }
-
-    // Función para registrar un nuevo cliente
-    function registerNewClient() {
-        let name = document.getElementById('cliente_nombre').value;
-        let address = document.getElementById('address').value;
-        let phone_number = document.getElementById('phone_number').value;
-        //`${endpoints.register_client}`
-        console.log(endpoints.register_client)
-        console.log(name, address, phone_number)
-
-    }
-
-    // Función asincrónica para verificar si el nombre del cliente existe
-    async function checkClientName() {
-        const clientName = input.value.trim();
-        if (clientName.length > 0) {
-            try {
-                const response = await fetch(`${endpoints.cliente_nombre}?query=${encodeURIComponent(clientName)}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': csrfToken
-                    }
-                });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-                let client;
-                if (data.length > 0 && data[0].full_name === clientName) {
-                    client = data[0];
-                }
-                if (client) {
-                    return client.client_id;
-                } else {
-                    return null;
-                }
-            } catch (error) {
-                console.error('Error checking client name:', error);
-                alert('Ocurrió un error al verificar el nombre del cliente. Por favor, inténtelo de nuevo más tarde.');
-            }
-        } else {
-            alert('Por favor, ingrese un nombre de cliente.');
-            return -1;
-        }
-    }
+    */
 });

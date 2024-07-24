@@ -1,32 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" crossorigin="anonymous">
     <title>{% block title %}{% endblock %}</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/styles.css') }}">
-    <!-- Custom CSS -->
     {% block customCSS %}
     {% endblock %}
 </head>
 
-<body class="text-center dark-theme">
-    <header>
-        <h1>Panel de Administrador</h1>
-        <div class="logout-container">
-            <a class="btn btn-secondary" href="{{ url_for('logout') }}">Cerrar Sesión</a>
-        </div>
-    </header>
-    <div class="tab">
-        <a class="tablinks" href="{{ url_for('home') }}">Inicio</a>
-        <a class="tablinks" href="{{ url_for('orders') }}">Pedidos</a>
-        <a class="tablinks" href="{{ url_for('clients') }}">Clientes</a>
-    </div>
-    {% block body %}
-    {% endblock %}
-</body>
+<body>
+    <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-0">
+        <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="{{ url_for('home') }}">Inicio</a>
+        <ul class="navbar-nav px-3">
+          <li class="nav-item text-nowrap">
+            <a class="nav-link" href="{{ url_for('logout') }}">Cerrar Sesión</a>
+          </li>
+        </ul>
+    </nav>
 
+  <div class="container-fluid">
+    <div class="row">
+      <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+        <div class="sidebar-sticky">
+            <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('home') }}">
+                <span data-feather="home"></span>
+                Home <span class="sr-only"></span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('orders') }}">
+                <span data-feather="file"></span>
+                Pedidos
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('clients') }}">
+                <span data-feather="users"></span>
+                Clientes
+                </a>
+            </li>
+            </ul>
+        
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+            <span>Reportes</span>
+            <a class="d-flex align-items-center text-muted" href="{{ url_for('home') }}">
+                <span data-feather="plus-circle"></span>
+            </a>
+            </h6>
+            <ul class="nav flex-column mb-2">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('home') }}">
+                <span data-feather="file-text"></span>
+                Última semana
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('home') }}">
+                <span data-feather="file-text"></span>
+                Último mes
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('home') }}">
+                <span data-feather="file-text"></span>
+                Últimos 6 meses
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('home') }}">
+                <span data-feather="file-text"></span>
+                Últimos 12 meses
+                </a>
+            </li>
+            </ul>
+        </div>     
+      </nav>
+
+        <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pt-3 px-4">
+            {% block body %}
+            {% endblock %}
+        </main>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script>
+      feather.replace()
+    </script>
+  </body>
 </html>

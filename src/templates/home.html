@@ -8,27 +8,33 @@
 {% endblock %}
 
 {% block body %}
-<main class="content">
+<main class="content container mt-4">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <form id="order_form">
-        <fieldset>
-            <legend>Datos del Cliente</legend>
-            <div class="form-field">
-                <input type="text" id="cliente_nombre" placeholder="Buscar cliente...">
-                <button type="button" id="check-name">&#10003</button>
-                <div class="client-det"></div>
+    <form id="order_form" class="needs-validation" novalidate>
+        <fieldset class="border p-4 mb-4">
+            <legend class="w-auto px-2">Datos del Cliente</legend>
+            <div class="form-group">
+                <label for="cliente_nombre" class="form-label">Nombre del Cliente</label>
+                <div class="input-group">
+                    <input type="text" id="cliente_nombre" class="form-control" placeholder="Buscar cliente..." required>
+                    <div class="input-group-append">
+                        <button type="button" id="check-name" class="btn btn-outline-primary">&#10003</button>
+                    </div>
+                </div>
+                <div id="autocomplete-list" class="autocomplete-suggestions list-group"></div>
+                <div class="client-det mt-2"></div>
             </div>
-            <div id="autocomplete-list" class="autocomplete-suggestions"></div>
+            
         </fieldset>
-
-        <fieldset>
-            <legend>Formulario de Items</legend>
-            <div class="item"></div>
-            <!--boton para agregar un nuevo item-->
-            <button type="button" id="add-item">+</button>
+        <!--
+        <fieldset class="border p-4 mb-4">
+            <legend class="w-auto px-2">Formulario de Items</legend>
+            <div class="item mb-3"></div>
+            <button type="button" id="add-item" class="btn btn-success">+</button>
         </fieldset>
         
-        <button id="submit">Registrar Orden</button>
+        <button id="submit" class="btn btn-primary">Registrar Orden</button>
+        -->
     </form>
 </main>
 

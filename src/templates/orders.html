@@ -9,12 +9,11 @@
 
 {% block body %}
 
-
-<div id="Pedidos" class="tabcontent">
-    <h2>Orders Data</h2>
-    <div class="content">
-        <table id="ordersTable">
-            <thead>
+<div id="Pedidos" class="tabcontent container mt-4">
+    <h2 class="mb-4">Orders Data</h2>
+    <div class="content table-responsive">
+        <table id="ordersTable" class="table table-striped table-hover">
+            <thead class="thead-dark">
                 <tr>
                     <th>Cliente</th>
                     <th>Estado</th>
@@ -34,7 +33,7 @@
                     <td>{{ order.creation_date }}</td>
                     <td>
                         {% if order.finish_date == '-' %}
-                            <button class="finish-button" data-order-id="{{ order.id }}">Terminar</button>
+                            <button class="finish-button btn btn-primary btn-sm" data-order-id="{{ order.id }}">Terminar</button>
                         {% else %}
                             {{ order.finish_date }}
                         {% endif %}

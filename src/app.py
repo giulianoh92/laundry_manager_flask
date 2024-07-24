@@ -90,7 +90,6 @@ def register_order():
             id = order['id'],
             client_id = order['client_id'],
             status_id = order['status_id'],
-            total_cost = order['total_cost'],
             creation_date = order['creation_date'],
             finish_date = order['finish_date']
         )
@@ -104,8 +103,12 @@ def register_order():
 def register_client():
     print('reg_cli')
     try:
-        client = request.json
-        client = Client(client['name'], client['address'], client['phone_number'])
+        client_data = request.json
+        print("Client_data:", client_data)
+        client = Client('', client_data['full_name'], client_data['address'], client_data['phone_number'])
+        print(client.full_name)
+        print(client.address)
+        print(client.phone_number)
         ClientModel.add_client(client)
         return jsonify({'success': True}), 200
     except Exception as e:

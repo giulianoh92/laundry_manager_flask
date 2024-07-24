@@ -42,6 +42,7 @@ class ClientModel():
     @classmethod
     def add_client(self, client):
         try:
+            print("hola no se que hago")
             connection = get_connection()
             with connection.cursor() as cursor:
                 cursor.execute(
@@ -49,12 +50,11 @@ class ClientModel():
                     VALUES (%s, %s, %s) RETURNING id""",
                     (client.full_name, client.address, client.phone_number)
                 )
-                # Fetch the id of the last inserted row
                 client.id = cursor.fetchone()[0]
                 affected_rows = cursor.rowcount
+                print(affected_rows, client.id)
                 connection.commit()
             connection.close()
-            return affected_rows
         except Exception as ex:
             raise Exception(ex)
 
