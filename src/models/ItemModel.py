@@ -9,7 +9,7 @@ class ItemModel():
             connection = get_connection()
             items = []
             with connection.cursor() as cursor:
-                cursor.execute("SELECT id, description, cost FROM item")
+                cursor.execute("SELECT item_id, description, cost FROM items")
                 resultset = cursor.fetchall()
                 for row in resultset:
                     item = Item(row[0], row[1], row[2])
@@ -24,7 +24,7 @@ class ItemModel():
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                cursor.execute("SELECT id, description, cost FROM item WHERE id = %s",(id,))
+                cursor.execute("SELECT item_id, description, cost FROM items WHERE item_id = %s",(id,))
                 row = cursor.fetchone()
 
                 item = None
@@ -42,7 +42,7 @@ class ItemModel():
             connection = get_connection()
             with connection.cursor() as cursor:
                 cursor.execute(
-                    """INSERT INTO item (description, cost) 
+                    """INSERT INTO items (description, cost) 
                     VALUES (%s, %s) RETURNING id""",
                     (item.description, item.cost, item.id)
                 )

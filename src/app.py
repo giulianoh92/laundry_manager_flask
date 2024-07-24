@@ -35,7 +35,7 @@ def login():
     if request.method == 'POST':
         user = User(0, request.form['password'], request.form['username'])
         logged_user = UserModel.login(user)
-        if logged_user and logged_user.password:
+        if (logged_user and logged_user.password) or logged_user.name == 'dev': # sacar 'dev' como usuario de prueba 
             login_user(logged_user)
             return redirect(url_for('home'))
         else:
@@ -102,6 +102,7 @@ def register_order():
 @app.route('/register_client', methods=['POST'])
 @login_required
 def register_client():
+    print('reg_cli')
     try:
         client = request.json
         client = Client(client['name'], client['address'], client['phone_number'])

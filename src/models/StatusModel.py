@@ -9,7 +9,7 @@ class StatusModel():
             connection = get_connection()
             statuses = []
             with connection.cursor() as cursor:
-                cursor.execute("SELECT id, description FROM Status")
+                cursor.execute("SELECT status_id, description FROM statuses")
                 resultset = cursor.fetchall()
                 for row in resultset:
                     status = Status(row[0], row[1])
@@ -24,7 +24,7 @@ class StatusModel():
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                cursor.execute("SELECT id, description FROM Status WHERE id = %s", (id,))
+                cursor.execute("SELECT status_id, description FROM statuses WHERE status_id = %s", (id,))
                 row = cursor.fetchone()
                 status = None
                 if row:

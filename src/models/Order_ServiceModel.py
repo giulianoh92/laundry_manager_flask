@@ -10,8 +10,8 @@ class Order_ServiceModel():
             order_services = []
             with connection.cursor() as cursor:
                 cursor.execute("""
-                    SELECT id, order_id, item_id, service_id, maincolor_id, othercolor_id, pattern_id, size_id, softener, indications 
-                    FROM Order_Service""")
+                    SELECT os_id, order_id, item_id, service_id, maincolor_id, othercolor_id, pattern_id, size_id, softener, indications 
+                    FROM order_services""")
                 resultset = cursor.fetchall()
                 for row in resultset:
                     order_service = Order_Service(*row)
@@ -27,8 +27,8 @@ class Order_ServiceModel():
             connection = get_connection()
             with connection.cursor() as cursor:
                 cursor.execute("""
-                    SELECT id, order_id, item_id, service_id, maincolor_id, othercolor_id, pattern_id, size_id, softener, indications 
-                    FROM Order_Service WHERE id = %s""", (id,))
+                    SELECT os_id, order_id, item_id, service_id, maincolor_id, othercolor_id, pattern_id, size_id, softener, indications 
+                    FROM Order_Service WHERE os_id = %s""", (id,))
                 row = cursor.fetchone()
                 order_service = None
                 if row:

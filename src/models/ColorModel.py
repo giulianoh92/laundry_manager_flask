@@ -9,7 +9,7 @@ class ColorModel():
             connection = get_connection()
             colors = []
             with connection.cursor() as cursor:
-                cursor.execute("SELECT id, name FROM Color")
+                cursor.execute("SELECT color_id, name FROM colors")
                 resultset = cursor.fetchall()
                 for row in resultset:
                     color = Color(row[0], row[1])
@@ -24,7 +24,7 @@ class ColorModel():
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                cursor.execute("SELECT id, name FROM Color WHERE id = %s", (id,))
+                cursor.execute("SELECT color_id, name FROM colors WHERE color_id = %s", (id,))
                 row = cursor.fetchone()
                 color = None
                 if row:
@@ -39,7 +39,7 @@ class ColorModel():
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                cursor.execute("INSERT INTO Color (name) VALUES (%s) RETURNING id", (color.name,))
+                cursor.execute("INSERT INTO colors (name) VALUES (%s) RETURNING id", (color.name,))
                 color.id = cursor.fetchone()[0]
                 connection.commit()
             connection.close()
@@ -52,7 +52,7 @@ class ColorModel():
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                cursor.execute("UPDATE Color SET name = %s WHERE id = %s", (color.name, color.id))
+                cursor.execute("UPDATE colors SET name = %s WHERE color_id = %s", (color.name, color.id))
                 connection.commit()
             connection.close()
             return True
@@ -64,7 +64,7 @@ class ColorModel():
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                cursor.execute("DELETE FROM Color WHERE id = %s", (id,))
+                cursor.execute("DELETE FROM colors WHERE color_id = %s", (id,))
                 connection.commit()
             connection.close()
             return True

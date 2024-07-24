@@ -9,7 +9,7 @@ class SizeModel():
             connection = get_connection()
             sizes = []
             with connection.cursor() as cursor:
-                cursor.execute("SELECT id, name, cost_multiplier FROM Size")
+                cursor.execute("SELECT size_id, name, cost_multiplier FROM sizes")
                 resultset = cursor.fetchall()
                 for row in resultset:
                     size = Size(row[0], row[1], row[2])
@@ -24,7 +24,7 @@ class SizeModel():
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                cursor.execute("SELECT id, name, cost_multiplier FROM Size WHERE id = %s", (id,))
+                cursor.execute("SELECT size_id, name, cost_multiplier FROM sizes WHERE size_id = %s", (id,))
                 row = cursor.fetchone()
                 size = None
                 if row:

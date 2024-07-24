@@ -9,7 +9,7 @@ class ClientModel():
             connection = get_connection()
             clients = []
             with connection.cursor() as cursor:
-                cursor.execute("SELECT id, name, address, phone_number FROM Client")
+                cursor.execute("SELECT client_id, full_name, address, phone_number FROM clients")
                 resultset = cursor.fetchall()
                 for row in resultset:
                     client = Client(row[0], row[1], row[2], row[3])
@@ -27,7 +27,7 @@ class ClientModel():
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                cursor.execute("SELECT id, name, address, phone_number FROM Client WHERE id = %s",(id,))
+                cursor.execute("SELECT client_id, full_name, address, phone_number FROM clients WHERE client_id = %s",(id,))
                 row = cursor.fetchone()
 
                 client = None
@@ -45,9 +45,9 @@ class ClientModel():
             connection = get_connection()
             with connection.cursor() as cursor:
                 cursor.execute(
-                    """INSERT INTO Client (name, address, phone_number) 
+                    """INSERT INTO clients (full_name, address, phone_number) 
                     VALUES (%s, %s, %s) RETURNING id""",
-                    (client.name, client.address, client.phone_number)
+                    (client.full_name, client.address, client.phone_number)
                 )
                 # Fetch the id of the last inserted row
                 client.id = cursor.fetchone()[0]
@@ -64,7 +64,7 @@ class ClientModel():
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                cursor.execute("DELETE FROM Client WHERE id = %s",(client.id,))
+                cursor.execute("DELETE FROM clients WHERE client_id = %s",(client.client_id,))
 
                 affected_rows = cursor.rowcount
                 connection.commit()
@@ -79,8 +79,8 @@ class ClientModel():
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                cursor.execute("""UPDATE Client SET name = %s, address = %s, phone_number = %s WHERE id = %s """,
-                               (client.name, client.address, client.phone_number, client.id))
+                cursor.execute("""UPDATE client SET full_name = %s, address = %s, phone_number = %s WHERE client_id = %s """,
+                               (client.full_name, client.address, client.phone_number, client.client_id))
                 affected_rows = cursor.rowcount
                 connection.commit()
             connection.close()

@@ -16,6 +16,19 @@ document.addEventListener("DOMContentLoaded", function () {
     const input = document.getElementById('cliente_nombre');
     const suggestionBox = document.getElementById('autocomplete-list');
     const form = document.getElementById('order_form');
+    const submit = document.getElementById('submit');
+
+    submit.addEventListener('click', () => {
+        const items = document.getElementsByClassName('form-field');
+        let data = {};
+        for (let i = 0; i < items.length; i++) {
+            const item = items[i];
+            const name = item.getAttribute('name');
+            const value = item.value;
+            data[name] = value;
+        }
+        console.log(data);
+    })
 
     // Initialize existing buttons
     initializeButtons();
@@ -57,14 +70,15 @@ document.addEventListener("DOMContentLoaded", function () {
     function showSuggestions(suggestions, query) {
         suggestionBox.innerHTML = '';
         suggestions.forEach(suggestion => {
-            const suggestionName = suggestion.name.toLowerCase();
+            console.log(suggestion);
+            const suggestionName = suggestion.full_name.toLowerCase();
             const queryLower = query.toLowerCase();
             if (suggestionName.includes(queryLower)) {
                 const div = document.createElement('div');
                 div.classList.add('autocomplete-suggestion');
-                div.textContent = suggestion.name;
+                div.textContent = suggestion.full_name;
                 div.addEventListener('click', function () {
-                    input.value = suggestion.name;
+                    input.value = suggestion.full_name;
                     suggestionBox.innerHTML = '';
                 });
                 suggestionBox.appendChild(div);
@@ -199,15 +213,14 @@ document.addEventListener("DOMContentLoaded", function () {
                     <label for="${itemId}-phone_number">Número de teléfono:</label>
                     <input type="text" id="${itemId}-phone_number" name="phone_number[]">
                 </div>
-   
                 <!-- Botón para registrar el cliente -->
-                <button id="register-client">Registrar Cliente</button>
+                <button class="register-client">Registrar Cliente</button>
             </div>
         `;
         itemsContainer.appendChild(newItemDiv);
-
+    
         // Initialize the new button
-        const registerNewClientButton = newItemDiv.querySelector('#register-client');
+        const registerNewClientButton = newItemDiv.querySelector('.register-client');
         registerNewClientButton.addEventListener('click', registerNewClient);
     }
 
@@ -219,33 +232,7 @@ document.addEventListener("DOMContentLoaded", function () {
         //`${endpoints.register_client}`
         console.log(endpoints.register_client)
         console.log(name, address, phone_number)
-        /*
-        fetch('/register_client', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken
-            },
-            body: JSON.stringify({
-                name: name,
-                address: address,
-                phone_number: phone_number
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log(data);
-            if (data.success) {
-                alert('Cliente registrado correctamente');
-                //window.location.href = '/clients';
-            } else {
-                alert('Error al registrar cliente: ' + data.error);
-            }
-        })
-        .catch(error => {
-            console.error('Error al registrar cliente:', error);
-        });
-        */
+
     }
 
     // Función asincrónica para verificar si el nombre del cliente existe
@@ -264,9 +251,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const data = await response.json();
-                const client = data.find(client => client.name.toLowerCase() === clientName.toLowerCase());
+                let client;
+                if (data.length > 0 && data[0].full_name === clientName) {
+                    client = data[0];
+                }
                 if (client) {
-                    return client.id;
+                    return client.client_id;
                 } else {
                     return null;
                 }

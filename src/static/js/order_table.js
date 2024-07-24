@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", function() {
                                                 <strong>Tamaño: </strong> ${order.size_name}<br>
                                                 <strong>Servicio: </strong> ${order.service_name},
                                                 <strong>Suavizante: </strong> ${order.softener? 'Sí' : 'No'}<br>
-                                                <strong>Costo: </strong> ${order.cost}<br>
+                                                <strong>Costo: </strong> $${order.cost}<br>
                                             </div>
                                         </td>
                                     </tr>

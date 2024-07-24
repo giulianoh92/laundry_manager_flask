@@ -1,0 +1,27 @@
+        /*
+        fetch('/register_client', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify({
+                name: name,
+                address: address,
+                phone_number: phone_number
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            if (data.success) {
+                alert('Cliente registrado correctamente');
+                //window.location.href = '/clients';
+            } else {
+                alert('Error al registrar cliente: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error al registrar cliente:', error);
+        });
+        */

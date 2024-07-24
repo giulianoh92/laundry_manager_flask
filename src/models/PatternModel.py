@@ -9,7 +9,7 @@ class PatternModel():
             connection = get_connection()
             patterns = []
             with connection.cursor() as cursor:
-                cursor.execute("SELECT id, name FROM Pattern")
+                cursor.execute("SELECT pattern_id, name FROM patterns")
                 resultset = cursor.fetchall()
                 for row in resultset:
                     pattern = Pattern(row[0], row[1])
@@ -24,7 +24,7 @@ class PatternModel():
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                cursor.execute("SELECT id, name FROM Pattern WHERE id = %s", (id,))
+                cursor.execute("SELECT pattern_id, name FROM patterns WHERE pattern_id = %s", (id,))
                 row = cursor.fetchone()
                 pattern = None
                 if row:

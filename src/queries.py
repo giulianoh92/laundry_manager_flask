@@ -57,30 +57,30 @@ class CompQueries():
             details = []
             with connection.cursor() as cursor:
                 cursor.execute("""SELECT 
-                Item.description AS item_name, 
-                Color1.name AS color1_name, 
-                Color2.name AS color2_name, 
-                Pattern.name AS pattern_name, 
-                Size.name AS size_name, 
-                Service.name AS service_name, 
-                Order_Service.softener AS softener, 
-                (Item.cost + Service.cost) * Size.cost_multiplier AS "cost"
+                i.description AS item_name, 
+                c1.name AS color1_name, 
+                c2.name AS color2_name, 
+                p.name AS pattern_name, 
+                si.name AS size_name, 
+                s.name AS service_name, 
+                os.softener AS softener, 
+                (i.cost + s.cost) * si.cost_multiplier AS "cost"
                 FROM 
-                    Order_Service 
+                    order_services os 
                 INNER JOIN 
-                    Item ON Item.id = Order_Service.item_id
+                    items i ON i.item_id = os.item_id
                 INNER JOIN 
-                    Color AS Color1 ON Color1.id = Order_Service.maincolor_id
+                    colors AS c1 ON c1.color_id = os.main_color_id
                 INNER JOIN 
-                    Color AS Color2 ON Color2.id = Order_Service.othercolor_id
+                    colors AS c2 ON c2.color_id = os.other_color_id
                 INNER JOIN 
-                    Pattern ON Pattern.id = Order_Service.pattern_id
+                    patterns p ON p.pattern_id = os.pattern_id
                 INNER JOIN 
-                    Size ON Size.id = Order_Service.size_id
+                    sizes si ON si.size_id = os.size_id
                 INNER JOIN 
-                    Service ON Service.id = Order_Service.service_id
+                    services s ON s.service_id = os.service_id
                 WHERE 
-                    Order_Service.order_id = %s;
+                    os.order_id = %s;
                 """, id)
                 resultset = cursor.fetchall()
                 for row in resultset:
@@ -106,37 +106,37 @@ class CompQueries():
             with connection.cursor() as cursor:
                 cursor.execute(query = """
                                     SELECT 
-                                        "Order".id, 
-                                        Client.name AS name, 
-                                        Status.description AS status, 
-                                        Client.address AS address, 
-                                        SUM((Item.cost + Service.cost) * Size.cost_multiplier) AS total_cost,
-                                        "Order".creation_date, 
-                                        "Order".finish_date 
+                                        o.order_id as id, 
+                                        c.full_name as client_name, 
+                                        st.description AS status, 
+                                        c.address AS address, 
+                                        SUM((it.cost + s.cost) * si.cost_multiplier) AS total_cost,
+                                        o.creation_date AS c_date, 
+                                        o.finish_date AS f_date
                                     FROM 
-                                        "Order"
+                                        orders o
                                     INNER JOIN 
-                                        Client ON "Order".client_id = Client.id
+                                        clients c ON o.client_id = c.client_id
                                     INNER JOIN 
-                                        Status ON "Order".status_id = Status.id
+                                        statuses st ON o.status_id = st.status_id
                                     INNER JOIN 
-                                        Order_Service ON "Order".id = Order_Service.order_id
+                                        order_services os ON o.order_id = os.order_id
                                     INNER JOIN 
-                                        Item ON Order_Service.item_id = Item.id
+                                        items it ON os.item_id = it.item_id
                                     INNER JOIN 
-                                        Service ON Order_Service.service_id = Service.id
+                                        services s ON os.service_id = s.service_id
                                     INNER JOIN 
-                                        Size ON Order_Service.size_id = Size.id
+                                        sizes si ON os.size_id = si.size_id
                                     GROUP BY 
-                                        "Order".id, 
-                                        Client.name, 
-                                        Status.description, 
-                                        Client.address, 
-                                        "Order".creation_date, 
-                                        "Order".finish_date,
-                                        Status.id
+                                        id, 
+                                        client_name, 
+                                        status, 
+                                        address, 
+                                        c_date, 
+                                        f_date,
+                                        st.status_id
                                     ORDER BY 
-                                        "Order".creation_date ASC;
+                                        c_date ASC;
 
                                     """)
                 resultset = cursor.fetchall()
@@ -157,7 +157,7 @@ class CompQueries():
             affected_rows = 0
 
             with connection.cursor() as cursor:
-                cursor.execute("""UPDATE "Order" SET finish_date = %s, status_id = 2 WHERE id = %s""", (current_date, id))
+                cursor.execute("""UPDATE orders SET finish_date = %s, status_id = 2 WHERE order_id = %s""", (current_date, id))
                 affected_rows = cursor.rowcount
                 connection.commit()
                 
@@ -171,17 +171,16 @@ class CompQueries():
         
     @classmethod
     def get_clients_matching(cls, query):
-        print('hola')
         try:
             connection = get_connection()
             clients = []
             with connection.cursor() as cursor:
-                cursor.execute("SELECT id, name FROM Client WHERE name LIKE %s", ('%' + query + '%',))
+                cursor.execute("SELECT client_id, full_name FROM clients WHERE full_name ILIKE %s", ('%' + query + '%',))
                 resultset = cursor.fetchall()
                 for row in resultset:
                     clients.append({
-                        'id': row[0],
-                        'name': row[1]
+                        'client_id': row[0],
+                        'full_name': row[1],
                     })
         except Exception as ex:
             raise Exception(ex)

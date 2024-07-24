@@ -10,10 +10,10 @@ class OrderModel():
             connection = get_connection()
             orders = []
             with connection.cursor() as cursor:
-                cursor.execute("SELECT id, client_id, status_id, total_cost, creation_date, finish_date FROM \"Order\"")
+                cursor.execute("SELECT order_id, client_id, status_id, creation_date, finish_date FROM orders")
                 resultset = cursor.fetchall()
                 for row in resultset:
-                    order = Order(row[0], row[1], row[2], row[3], row[4], row[5])
+                    order = Order(row[0], row[1], row[2], row[3], row[4])
                     orders.append(order.to_JSON())
             connection.close()
             return orders
@@ -26,12 +26,12 @@ class OrderModel():
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                cursor.execute("SELECT id, client_id, status_id, total_cost, creation_date, finish_date FROM \"Order\" WHERE id = %s",(id,))
+                cursor.execute("SELECT order_id, client_id, status_id, creation_date, finish_date FROM orders WHERE order_id = %s",(id,))
                 row = cursor.fetchone()
 
                 order = None
                 if row:
-                    order = Order(row[0], row[1], row[2], row[3], row[4], row[5])
+                    order = Order(row[0], row[1], row[2], row[3], row[4])
                     order = order.to_JSON()
             connection.close()
             return order
@@ -44,9 +44,9 @@ class OrderModel():
             connection = get_connection()
             with connection.cursor() as cursor:
                 cursor.execute(
-                    """INSERT INTO "Order" (client_id, status_id, total_cost, creation_date, finish_date) 
-                    VALUES (%s, %s, %s, %s, %s) RETURNING id""",
-                    (order.client_id, order.status_id, order.total_cost, order.creation_date, order.finish_date)
+                    """INSERT INTO orders (client_id, status_id, creation_date, finish_date) 
+                    VALUES (%s, %s, %s, %s) RETURNING id""",
+                    (order.client_id, order.status_id, order.creation_date, order.finish_date)
                 )
                 # Fetch the id of the last inserted row
                 order.id = cursor.fetchone()[0]
@@ -63,7 +63,7 @@ class OrderModel():
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                cursor.execute("DELETE FROM \"Order\" WHERE id = %s",(order.id,))
+                cursor.execute("DELETE FROM orders WHERE order_id = %s",(order.id,))
 
                 affected_rows = cursor.rowcount
                 connection.commit()
@@ -78,9 +78,9 @@ class OrderModel():
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                cursor.execute("""UPDATE \"Order\" SET client_id = %s, status_id = %s, total_cost = %s, creation_date = %s, finish_date = %s 
+                cursor.execute("""UPDATE orders SET client_id = %s, status_id = %s, creation_date = %s, finish_date = %s 
                                WHERE id = %s """,
-                               (order.client_id, order.status_id, order.total_cost, order.creation_date, order.finish_date, order.id))
+                               (order.client_id, order.status_id, order.creation_date, order.finish_date, order.id))
                 affected_rows = cursor.rowcount
                 connection.commit()
             connection.close()

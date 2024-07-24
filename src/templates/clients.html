@@ -3,7 +3,6 @@
 {% block title %}Orders{% endblock %}
 
 {% block customCSS %}
-<!-- Link to a Google Font (example) -->
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 {% endblock %}
 
@@ -17,6 +16,7 @@
                 <tr>
                     <th>ID</th>
                     <th>Nombre</th>
+                    <th>Apellido</th>
                     <th>Dirección</th>
                     <th>Teléfono</th>
                 </tr>
@@ -24,8 +24,9 @@
             <tbody>
                 {% for client in clients %}
                 <tr>
-                    <td>{{ client.id }}</td>
-                    <td>{{ client.name }}</td>
+                    <td>{{ client.client_id }}</td>
+                    <td>{{ client.first_name }}</td>
+                    <td>{{ client.last_name }}</td>
                     <td>{{ client.address }}</td>
                     <td>{{ client.phone_number }}</td>
                 </tr>

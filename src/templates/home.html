@@ -10,7 +10,7 @@
 {% block body %}
 <main class="content">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <form action="" method="POST" id="order_form">
+    <form id="order_form">
         <fieldset>
             <legend>Datos del Cliente</legend>
             <div class="form-field">
@@ -28,7 +28,7 @@
             <button type="button" id="add-item">+</button>
         </fieldset>
         
-        <button type="submit">Registrar Orden</button>
+        <button id="submit">Registrar Orden</button>
     </form>
 </main>
 

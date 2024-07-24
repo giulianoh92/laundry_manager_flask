@@ -9,7 +9,7 @@ class ServiceModel():
             connection = get_connection()
             services = []
             with connection.cursor() as cursor:
-                cursor.execute("SELECT id, name, description, cost FROM Service")
+                cursor.execute("SELECT service_id, name, description, cost FROM services")
                 resultset = cursor.fetchall()
                 for row in resultset:
                     service = Service(*row)
@@ -24,7 +24,7 @@ class ServiceModel():
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                cursor.execute("SELECT id, name, description, cost FROM Service WHERE id = %s", (id,))
+                cursor.execute("SELECT service_id, name, description, cost FROM services WHERE service_id = %s", (id,))
                 row = cursor.fetchone()
                 service = None
                 if row:
