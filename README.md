@@ -1,44 +1,43 @@
 # Laundry Manager Flask
 
-## Descripción
+## Description
 
-Laundry Manager es una aplicación web desarrollada con Flask que sirve como un panel de control (dashboard) para la gestión de pedidos y clientes en un negocio de lavandería. Los usuarios administradores pueden iniciar sesión en la página, registrar nuevos clientes o pedidos, visualizar pedidos pendientes y finalizar aquellos que ya han sido completados.
+Laundry Manager is a web application developed with Flask that serves as a dashboard for managing orders and clients in a laundry business. Admin users can log in, register new clients or orders, view pending orders, and finalize completed ones.
 
-La aplicación web se conecta a una API desarrollada con Flask que realiza operaciones CRUD en una base de datos PostgreSQL.
+The web application connects to a Flask API that performs CRUD operations on a PostgreSQL database.
 
+## Installation
 
-## Instalación
-
-1. Clona este repositorio:
+1. Clone this repository:
 
     ```bash
     git clone https://github.com/giulianoh92/laundry_manager_flask.git
     cd laundry_manager_flask
     ```
 
-2. Crea y activa un entorno virtual (opcional pero recomendado):
+2. Create and activate a virtual environment (optional but recommended):
 
     ```bash
     python -m venv venv
-    source venv/bin/activate  # En Windows: venv\Scripts\activate
+    source venv/bin/activate  # On Windows: venv\Scripts\activate
     ```
 
-3. Instala las dependencias necesarias:
+3. Install the necessary dependencies:
 
     ```bash
     pip install -r requirements.txt
     ```
 
-4. Configura la base de datos PostgreSQL. Ejecuta los scripts SQL proporcionados en la carpeta `sql` para crear las tablas y poblar la base de datos.
+4. Set up the PostgreSQL database. Run the provided SQL scripts in the `sql` folder to create the tables and populate the database.
 
-5. Configura el archivo `config.py` con los detalles de tu base de datos PostgreSQL.
+5. Configure the `config.py` file with your PostgreSQL database details.
 
-## Uso
+## Usage
 
-1. Ejecuta la aplicación Flask:
+1. Run the Flask application:
 
     ```bash
     python src/app.py
     ```
 
-2. Abre tu navegador y accede a `http://127.0.0.1:5000` para usar el panel de control.
+2. Open your browser and navigate to `http://127.0.0.1:5000` to access the dashboard.
