@@ -16,7 +16,7 @@ from queries import CompQueries
 from config import config
 
 # Routes
-from routes import Order
+from routes import Order, Client
 
 app = Flask(__name__)
 csrf = CSRFProtect()
@@ -35,7 +35,7 @@ def login():
     if request.method == 'POST':
         user = User(0, request.form['password'], request.form['username'])
         logged_user = UserModel.login(user)
-        if (logged_user and logged_user.password) or logged_user.name == 'dev': # sacar 'dev' como usuario de prueba 
+        if ((logged_user and logged_user.password)):
             login_user(logged_user)
             return redirect(url_for('home'))
         else:
@@ -66,73 +66,6 @@ def clients():
     clients = ClientModel.get_clients() 
     return render_template('clients.html', clients=clients)
 
-@app.route('/details/<id>', methods=['GET'])
-#@login_required
-def order_details(id):
-    details = CompQueries.get_order_details(id)
-    return details
-
-@app.route('/finish/<int:id>', methods=['POST'])
-@login_required
-def finish(id):
-    try:
-        result = CompQueries.finish(id)
-        return jsonify({'success': True, 'finish_date': result}), 200
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-    
-@app.route('/register_order', methods=['POST'])
-@login_required
-def register_order():
-    try:
-        order = request.json
-        client_id = order['client_id']
-        items = []
-        for item in order['items']:
-            items.append({
-                'item_id':item['item_id'],
-                'service_id':item['service_id'],
-                'maincolor_id':item['maincolor_id'],
-                'othercolor_id':item['othercolor_id'],
-                'pattern_id':item['pattern_id'],
-                'size_id':item['size_id'],
-                'softener':item['softener'],
-                'indications':item['indications']
-            })
-        # POST 500 ERROR after this line
-        CompQueries.register_order(client_id, items)
-        return jsonify({'success': True}), 200
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-    
-@app.route('/register_client', methods=['POST'])
-@login_required
-def register_client():
-    try:
-        client_data = request.json
-        client = Client('', client_data['full_name'], client_data['address'], client_data['phone_number'])
-        ClientModel.add_client(client)
-        return jsonify({'success': True}), 200
-    except Exception as e:
-        return jsonify({'success': False, 'error': str(e)}), 500
-
-    
-
-@app.route('/get_clients', methods=['GET'])
-@login_required
-def get_clients():
-    query = request.args.get('query')
-    if query:
-        clients = CompQueries.get_clients_matching(query)
-    else:
-        clients = ClientModel.get_clients()
-    return jsonify(clients)
-
-@app.route('/get_client/<id>', methods=['GET'])
-@login_required
-def get_client(id):
-    client = ClientModel.get_client(id)
-    return jsonify(client)
 
 @app.route('/get_items', methods=['GET'])
 @login_required
@@ -179,6 +112,8 @@ if __name__ == '__main__':
 
     # Blueprints
     app.register_blueprint(Order.main, url_prefix='/api/orders')
+    app.register_blueprint(Client.main, url_prefix='/api/clients')
+
     csrf.init_app(app)
     app.register_error_handler(401, status_401)
     app.register_error_handler(404, status_404)

@@ -81,7 +81,7 @@ class CompQueries():
                     services s ON s.service_id = os.service_id
                 WHERE
                     os.order_id = %s;
-                """, id)
+                """, (id,))
                 resultset = cursor.fetchall()
                 for row in resultset:
                     detail = Order_det(row[0],
@@ -146,27 +146,6 @@ class CompQueries():
                     orders.append(order.to_JSON())
             connection.close()
             return orders
-        except Exception as ex:
-            raise Exception(ex)
-
-
-    @classmethod  
-    def finish(self, id):
-        try:
-            connection = get_connection()
-            current_date = datetime.datetime.now().strftime('%Y-%m-%d')
-            affected_rows = 0
-
-            with connection.cursor() as cursor:
-                cursor.execute("""UPDATE orders SET finish_date = %s, status_id = 2 WHERE order_id = %s""", (current_date, id))
-                affected_rows = cursor.rowcount
-                connection.commit()
-                
-            connection.close()
-            if affected_rows == 0:
-                raise Exception("Order not found")
-            return current_date
-            
         except Exception as ex:
             raise Exception(ex)
         

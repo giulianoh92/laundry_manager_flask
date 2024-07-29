@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 const orderId = event.target.getAttribute("data-order-id");
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
                 
-                fetch(`/finish/${orderId}`, {
+                fetch(`/api/orders/finish/${orderId}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     detailsRows.forEach(detailsRow => detailsRow.remove());
                 } else {
                     // Si no hay detalles visibles, se hace la solicitud para obtener los detalles
-                    fetch(`/details/${orderId}`)
+                    fetch(`/api/orders/details/${orderId}`)
                         .then(response => {
                             if (!response.ok) {
                                 throw new Error('Network response was not ok');

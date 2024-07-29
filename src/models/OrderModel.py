@@ -1,6 +1,6 @@
 from database.db import get_connection
 from .entities.Order import Order
-
+import datetime
 
 class OrderModel():
 
@@ -85,5 +85,25 @@ class OrderModel():
                 connection.commit()
             connection.close()
             return affected_rows
+        except Exception as ex:
+            raise Exception(ex)
+        
+    @classmethod  
+    def finish(self, id):
+        try:
+            connection = get_connection()
+            current_date = datetime.datetime.now().strftime('%Y-%m-%d')
+            affected_rows = 0
+
+            with connection.cursor() as cursor:
+                cursor.execute("""UPDATE orders SET finish_date = %s, status_id = 2 WHERE order_id = %s""", (current_date, id))
+                affected_rows = cursor.rowcount
+                connection.commit()
+                
+            connection.close()
+            if affected_rows == 0:
+                raise Exception("Order not found")
+            return current_date
+            
         except Exception as ex:
             raise Exception(ex)

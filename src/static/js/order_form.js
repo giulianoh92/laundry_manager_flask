@@ -1,15 +1,15 @@
 document.addEventListener("DOMContentLoaded", function () {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const endpoints = {
-        cliente_nombre: "/get_clients",
+        cliente_nombre: "/api/clients",
         item: "/get_items",
         tipo_servicio: "/get_services",
         color_principal: "/get_colors",
         color_secundario: "/get_colors",
         patron_tela: "/get_patterns",
         tamano_objeto: "/get_sizes",
-        register_client: "/register_client",
-        register_order: "/register_order",
+        register_client: "/api/clients/register",
+        register_order: "/api/orders/register_order",
     };
     let id;
     const form = document.querySelector('order_form');
@@ -106,6 +106,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const newItemDiv = document.createElement('div');
             newItemDiv.classList.add('item');
             newItemDiv.innerHTML = ` 
+                <p class="text-danger">Cliente no existente, por favor registra datos del nuevo cliente</p>
                 <div class="item-box border p-3 mb-3">
                     <div class="form-group">
                         <label for="address">Dirección:</label>
@@ -125,7 +126,6 @@ document.addEventListener("DOMContentLoaded", function () {
             const registerNewClientButton = newItemDiv.querySelector('.register-client');
             registerNewClientButton.addEventListener('click', registerNewClient);
         }
-        
     }
 
     // Función asincrónica para verificar si el nombre del cliente existe
@@ -165,10 +165,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Función para registrar un nuevo cliente
     function registerNewClient() {
-        let name = document.getElementById('cliente_nombre').value;
-        let address = document.getElementById('address').value;
-        let phone_number = document.getElementById('phone_number').value;
-    
+        const name = document.getElementById('cliente_nombre').value;
+        const address = document.getElementById('address').value;
+        const phone_number = document.getElementById('phone_number').value;
+
+        // Verificar que name, address, and phone_number no estén vacíos
+        if (!name || !address || !phone_number) {
+            alert('Por favor, complete todos los campos.');
+            return;
+        }
+
         fetch(`${endpoints.register_client}`, {
             method: 'POST',
             headers: {
@@ -185,7 +191,8 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(data => {
             if (data.success) {
                 alert('Cliente registrado con éxito.');
-                window.location.href = 'home';
+                document.querySelector('.client-det').remove();
+                handleCheckName();
             } else {
                 alert('Ocurrió un error al registrar el cliente. Por favor, inténtelo de nuevo más tarde.');
             }
@@ -204,57 +211,27 @@ document.addEventListener("DOMContentLoaded", function () {
             suggestionBox.remove();
             addNewItemField();
         }, 1000);
-
     }
     
-    // Función para agregar un nuevo campo de item
-    function addNewItemField() {
-        const itemsContainer = document.querySelector('.item');
-        const newItemDiv = document.createElement('div'); // Cambio aquí para 'div' en lugar de 'form-group'
-        const itemId = generateUniqueId();
+    // Crea un nuevo campo de item
+    function createNewItemField(itemId) {
+        const newItemDiv = document.createElement('div');
         newItemDiv.innerHTML = `
             <p class="text-danger">Campos marcados con * son obligatorios</p>
             <div class="item-box border p-3 mb-3">
                 <div class="container">
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="${itemId}-item">Item*:</label>
-                                <select id="${itemId}-item" name="item[]" class="form-control" required></select>
-                            </div>
-                            <div class="form-group">
-                                <label for="${itemId}-tipo_servicio">Tipo de Servicio*:</label>
-                                <select id="${itemId}-tipo_servicio" name="tipo_servicio[]" class="form-control" required></select>
-                            </div>
-                            <div class="form-group">
-                                <label for="${itemId}-color_principal">Color Principal:</label>
-                                <select id="${itemId}-color_principal" name="color_principal[]" class="form-control" required></select>
-                            </div>
-                            <div class="form-group">
-                                <label for="${itemId}-color_secundario">Color Secundario:</label>
-                                <select id="${itemId}-color_secundario" name="color_secundario[]" class="form-control"></select>
-                            </div>
+                            ${createFormGroup('item', itemId, 'Item*:', true)}
+                            ${createFormGroup('tipo_servicio', itemId, 'Tipo de Servicio*:', true)}
+                            ${createFormGroup('color_principal', itemId, 'Color Principal:', true)}
+                            ${createFormGroup('color_secundario', itemId, 'Color Secundario:', false)}
                         </div>
                         <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="${itemId}-patron_tela">Patrón de Tela:</label>
-                                <select id="${itemId}-patron_tela" name="patron_tela[]" class="form-control"></select>
-                            </div>
-                            <div class="form-group">
-                                <label for="${itemId}-tamano_objeto">Tamaño del Objeto*:</label>
-                                <select id="${itemId}-tamano_objeto" name="tamano_objeto[]" class="form-control" required></select>
-                            </div>
-                            <div class="form-group">
-                                <label for="${itemId}-suavizante">Suavizante?:</label>
-                                <select id="${itemId}-suavizante" name="suavizante[]" class="form-control">
-                                    <option value=false>No</option>
-                                    <option value=true>Si</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="${itemId}-indicaciones">Indicaciones adicionales:</label>
-                                <input type="text" id="${itemId}-indicaciones" name="indicaciones[]" class="form-control">
-                            </div>
+                            ${createFormGroup('patron_tela', itemId, 'Patrón de Tela:', false)}
+                            ${createFormGroup('tamano_objeto', itemId, 'Tamaño del Objeto*:', true)}
+                            ${createFormGroup('suavizante', itemId, 'Suavizante?:', false, true)}
+                            ${createInputGroup('indicaciones', itemId, 'Indicaciones adicionales:', false)}
                         </div>
                     </div>
                     <div class="form-group">
@@ -263,94 +240,135 @@ document.addEventListener("DOMContentLoaded", function () {
                 </div>
             </div>
         `;
+        return newItemDiv;
+    }
+
+    // Crea un grupo de formulario para los selects
+    function createFormGroup(name, itemId, label, isRequired, isSoftener = false) {
+        return `
+            <div class="form-group">
+                <label for="${itemId}-${name}">${label}</label>
+                <select id="${itemId}-${name}" name="${name}[]" class="form-control" ${isRequired ? 'required' : ''}>
+                    ${isSoftener ? '<option value=false>No</option><option value=true>Si</option>' : ''}
+                </select>
+            </div>
+        `;
+    }
+
+    // Crea un grupo de formulario para los inputs
+    function createInputGroup(name, itemId, label, isRequired) {
+        return `
+            <div class="form-group">
+                <label for="${itemId}-${name}">${label}</label>
+                <input type="text" id="${itemId}-${name}" name="${name}[]" class="form-control" ${isRequired ? 'required' : ''}>
+            </div>
+        `;
+    }
+
+    // Agrega el botón de eliminación al nuevo campo de item
+    function addDeleteButton(newItemDiv) {
         const deleteButton = newItemDiv.querySelector('.delete-item');
         deleteButton.addEventListener('click', function () {
             newItemDiv.remove();
         });
-        itemsContainer.appendChild(newItemDiv);
+    }
+
+    // Agrega el botón de registrar
+    function addRegisterButton(itemsContainer) {
         const registerButton = document.getElementById('register-button');
-        if(registerButton){
+        if (registerButton) {
             registerButton.remove();
         }
         const registerButtonDiv = document.createElement('div');
         registerButtonDiv.innerHTML = `
-        <button type="button" class="btn btn-primary" id="register-button">Registrar</button>
+            <button type="button" class="btn btn-primary" id="register-button">Registrar</button>
         `;
         itemsContainer.appendChild(registerButtonDiv);
+
         const registerButtonElement = document.getElementById('register-button');
-        let orderData = [];
-        registerButtonElement.addEventListener('click', function () {
-            const items = document.querySelectorAll('.item-box');
-            items.forEach(item => {
-                const control = item.querySelectorAll('.form-control, .form-check-input');
-                const elementData = {
-                    item_id: control[0].value === '' ? null : control[0].value,
-                    service_id: control[1].value === '' ? null : control[1].value,
-                    maincolor_id: control[2].value === '' ? null : control[2].value,
-                    othercolor_id: control[3].value === '' ? null : control[3].value,
-                    pattern_id: control[4].value === '' ? null : control[4].value,
-                    size_id: control[5].value === '' ? null : control[5].value,
-                    softener: control[6].value === '' ? null : control[6].value,
-                    indications: control[7].value === '' ? null : control[7].value
-                };
-                orderData.push(elementData);
-            });
-            fetch(`${endpoints.register_order}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken
-                },
-                body: JSON.stringify({
-                    client_id: id,
-                    items: orderData
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Pedido registrado con éxito.');
-                    window.location.href = 'orders';
-                } else {
-                    alert('Ocurrió un error al registrar el pedido. Por favor, inténtelo de nuevo más tarde.');
-                }
-            })
-            .catch(error => {
-                console.error('Error registering new order:', error);
-                alert('Ocurrió un error al registrar el pedido. Por favor, inténtelo de nuevo más tarde.');
-            });
+        registerButtonElement.addEventListener('click', registerOrder);
+    }
+
+    // Registra el pedido al hacer clic en el botón de registrar
+    function registerOrder() {
+        const items = document.querySelectorAll('.item-box');
+        const orderData = Array.from(items).map(item => {
+            const controls = item.querySelectorAll('.form-control, .form-check-input');
+            return {
+                item_id: controls[0].value || null,
+                service_id: controls[1].value || null,
+                maincolor_id: controls[2].value || null,
+                othercolor_id: controls[3].value || null,
+                pattern_id: controls[4].value || null,
+                size_id: controls[5].value || null,
+                softener: controls[6].value || null,
+                indications: controls[7].value || null
+            };
         });
 
-        const addItemButton = document.querySelector('#add-item-button');
-        if (addItemButton){
-            addItemButton.remove();
-        }
-        //
+        fetch(`${endpoints.register_order}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify({
+                client_id: id,
+                items: orderData
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Pedido registrado con éxito.');
+                window.location.href = 'orders';
+            } else {
+                alert('Ocurrió un error al registrar el pedido. Por favor, inténtelo de nuevo más tarde.');
+            }
+        })
+        .catch(error => {
+            console.error('Error registering new order:', error);
+            alert('Ocurrió un error al registrar el pedido. Por favor, inténtelo de nuevo más tarde.');
+        });
+    }
 
-        // Cargar opciones para los campos de selección
+    // Cargar opciones para los campos de selección
+    function loadOptionsForFields(itemId) {
         loadOptions(endpoints.item, `${itemId}-item`);
         loadOptions(endpoints.tipo_servicio, `${itemId}-tipo_servicio`);
         loadOptions(endpoints.color_principal, `${itemId}-color_principal`);
         loadOptions(endpoints.color_secundario, `${itemId}-color_secundario`);
         loadOptions(endpoints.patron_tela, `${itemId}-patron_tela`);
         loadOptions(endpoints.tamano_objeto, `${itemId}-tamano_objeto`);
-
-        addAddItemButton();
     }
 
-    // Función para agregar el botón verde
-    function addAddItemButton() {
+    // Función principal para agregar un nuevo campo de item
+    function addNewItemField() {
         const itemsContainer = document.querySelector('.item');
-        const addButtonDiv = document.createElement('div');
-        addButtonDiv.innerHTML = `
-            <div class="form-group">
-                <button type="button" id="add-item-button" class="btn btn-success">Agregar otro item</button>
-            </div>
-        `;
-        itemsContainer.appendChild(addButtonDiv);
+        const itemId = generateUniqueId();
+        const newItemDiv = createNewItemField(itemId);
+        
+        addDeleteButton(newItemDiv);
+        itemsContainer.appendChild(newItemDiv);
+        addAddItemButton(itemsContainer);
+        addRegisterButton(itemsContainer);
+        loadOptionsForFields(itemId);
+        
+    }
 
-        const addItemButton = addButtonDiv.querySelector('#add-item-button');
-        addItemButton.addEventListener('click', addNewItemField);
+    // Function to add the green button
+    function addAddItemButton(itemsContainer) {
+        const addItemButton = document.querySelector('#add-item-button');
+        if (addItemButton) {
+            addItemButton.remove();
+        }
+        const addItemButtonDiv = document.createElement('div');
+        addItemButtonDiv.innerHTML = `
+            <button type="button" class="btn btn-secondary" id="add-item-button">Añadir Item</button>
+        `;
+        itemsContainer.appendChild(addItemButtonDiv);
+        const newAddItemButton = document.querySelector('#add-item-button');
+        newAddItemButton.addEventListener('click', addNewItemField);
     }
 
     // Función para cargar opciones en un select desde un endpoint
