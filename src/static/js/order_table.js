@@ -58,27 +58,37 @@ document.addEventListener("DOMContentLoaded", function() {
 
                             // Construir y mostrar los detalles de la orden para cada objeto en la lista
                             data.forEach(order => {
-
+                                // Determine if a comma should be included
+                                const mainColor = order.main_color ?? '';
+                                const otherColor = order.other_color ?? '';
+                            
+                                // Construct the colors string based on availability of colors
+                                const colorsHTML = mainColor && otherColor
+                                    ? `${mainColor}, ${otherColor}`
+                                    : mainColor || otherColor;
+                            
                                 const detailsHTML = `
                                     <tr class="details-row">
                                         <td colspan="6">
-                                            <div>
-                                                <strong>Item: </strong> ${order.item_name}<br>
-                                                <strong>Colores:</strong> 
-                                                <div class="color-container">
-                                                    <div class="circle" style="background-color: ${order.main_color};"></div> 
-                                                    <div class="circle" style="background-color: ${order.other_color};"></div><br>
+                                            <div class="container">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <strong>Item: </strong> ${order.item_name ?? ''}<br>
+                                                        <strong>Colores:</strong> ${colorsHTML}<br>
+                                                        <strong>Patrón: </strong>${order.pattern_name ?? ''}<br>
+                                                        <strong>Tamaño: </strong> ${order.size_name ?? ''}<br>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <strong>Servicio: </strong> ${order.service_name ?? ''}<br>
+                                                        <strong>Suavizante: </strong> ${order.softener ? 'Sí' : 'No'}<br>
+                                                        <strong>Costo: </strong> $${order.cost ?? ''}<br>
+                                                    </div>
                                                 </div>
-                                                <strong>Patrón: </strong>${order.pattern_name}<br>
-                                                <strong>Tamaño: </strong> ${order.size_name}<br>
-                                                <strong>Servicio: </strong> ${order.service_name},
-                                                <strong>Suavizante: </strong> ${order.softener? 'Sí' : 'No'}<br>
-                                                <strong>Costo: </strong> $${order.cost}<br>
                                             </div>
                                         </td>
                                     </tr>
                                 `;
-                                
+                            
                                 // Insertar detalles después de la fila de la orden clickeada
                                 row.insertAdjacentHTML('afterend', detailsHTML);
                             });

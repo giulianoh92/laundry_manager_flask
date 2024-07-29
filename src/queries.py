@@ -56,30 +56,30 @@ class CompQueries():
             connection = get_connection()
             details = []
             with connection.cursor() as cursor:
-                cursor.execute("""SELECT 
-                i.description AS item_name, 
-                c1.name AS color1_name, 
-                c2.name AS color2_name, 
-                p.name AS pattern_name, 
-                si.name AS size_name, 
-                s.name AS service_name, 
-                os.softener AS softener, 
+                cursor.execute("""SELECT
+                i.description AS item_name,
+                c1.name AS color1_name,
+                c2.name AS color2_name,
+                p.name AS pattern_name,
+                si.name AS size_name,
+                s.name AS service_name,
+                os.softener AS softener,
                 (i.cost + s.cost) * si.cost_multiplier AS "cost"
-                FROM 
-                    order_services os 
-                INNER JOIN 
+                FROM
+                    order_services os
+                INNER JOIN
                     items i ON i.item_id = os.item_id
-                INNER JOIN 
+                LEFT JOIN
                     colors AS c1 ON c1.color_id = os.main_color_id
-                INNER JOIN 
+                LEFT JOIN
                     colors AS c2 ON c2.color_id = os.other_color_id
-                INNER JOIN 
+                LEFT JOIN
                     patterns p ON p.pattern_id = os.pattern_id
-                INNER JOIN 
+                INNER JOIN
                     sizes si ON si.size_id = os.size_id
-                INNER JOIN 
+                INNER JOIN
                     services s ON s.service_id = os.service_id
-                WHERE 
+                WHERE
                     os.order_id = %s;
                 """, id)
                 resultset = cursor.fetchall()
@@ -111,8 +111,8 @@ class CompQueries():
                                         st.description AS status, 
                                         c.address AS address, 
                                         SUM((it.cost + s.cost) * si.cost_multiplier) AS total_cost,
-                                        o.creation_date AS c_date, 
-                                        o.finish_date AS f_date
+                                        TO_CHAR(o.creation_date, 'DD/MM/YYYY') AS c_date, 
+                                        TO_CHAR(o.finish_date, 'DD/MM/YYYY') AS f_date
                                     FROM 
                                         orders o
                                     INNER JOIN 
@@ -136,7 +136,7 @@ class CompQueries():
                                         f_date,
                                         st.status_id
                                     ORDER BY 
-                                        c_date ASC
+                                        id DESC
                                     LIMIT 10;
 
                                     """)
@@ -190,3 +190,43 @@ class CompQueries():
                 connection.close()
         
         return clients
+
+    @classmethod
+    def register_order(cls, client_id, items):
+        connection = None
+        try:
+            connection = get_connection()
+            print("Client ID:", client_id)
+            print("Items:", items)
+
+            with connection.cursor() as cursor:
+                # Insert the order and get the generated order_id
+                cursor.execute(
+                    "INSERT INTO orders (client_id, status_id, creation_date) VALUES (%s, 1, %s) RETURNING order_id",
+                    (client_id, datetime.datetime.now())
+                )
+                order_id = cursor.fetchone()[0]
+                
+                # Insert each item into the order_services table
+                for item in items:
+                    cursor.execute(
+                        """
+                        INSERT INTO order_services (order_id, service_id, item_id, main_color_id, other_color_id, pattern_id, size_id, softener, indications)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        """,
+                        (
+                            order_id, item['service_id'], item['item_id'], item['maincolor_id'],
+                            item['othercolor_id'], item['pattern_id'], item['size_id'],
+                            item['softener'], item['indications']
+                        )
+                    )
+                
+                # Commit transaction after all inserts
+                connection.commit()
+        except Exception as ex:
+            print("An error occurred:", ex)  # Print the exception message
+            connection.rollback()  # Rollback the transaction if an error occurs
+            raise  # Re-raise the exception to propagate it
+        finally:
+            if connection:
+                connection.close()

@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
         patron_tela: "/get_patterns",
         tamano_objeto: "/get_sizes",
         register_client: "/register_client",
+        register_order: "/register_order",
     };
     let id;
     const form = document.querySelector('order_form');
@@ -212,47 +213,55 @@ document.addEventListener("DOMContentLoaded", function () {
         const newItemDiv = document.createElement('div'); // Cambio aquí para 'div' en lugar de 'form-group'
         const itemId = generateUniqueId();
         newItemDiv.innerHTML = `
+            <p class="text-danger">Campos marcados con * son obligatorios</p>
             <div class="item-box border p-3 mb-3">
-                <div class="form-group">
-                    <label for="${itemId}-item">Item:</label>
-                    <select id="${itemId}-item" name="item[]" class="form-control" required></select>
-                </div>
-                <div class="form-group">
-                    <label for="${itemId}-tipo_servicio">Tipo de Servicio:</label>
-                    <select id="${itemId}-tipo_servicio" name="tipo_servicio[]" class="form-control" required></select>
-                </div>
-                <div class="form-group">
-                    <label for="${itemId}-color_principal">Color Principal:</label>
-                    <select id="${itemId}-color_principal" name="color_principal[]" class="form-control" required></select>
-                </div>
-                <div class="form-group">
-                    <label for="${itemId}-color_secundario">Color Secundario:</label>
-                    <select id="${itemId}-color_secundario" name="color_secundario[]" class="form-control"></select>
-                </div>
-                <div class="form-group">
-                    <label for="${itemId}-patron_tela">Patrón de Tela:</label>
-                    <select id="${itemId}-patron_tela" name="patron_tela[]" class="form-control"></select>
-                </div>
-                <div class="form-group">
-                    <label for="${itemId}-tamano_objeto">Tamaño del Objeto:</label>
-                    <select id="${itemId}-tamano_objeto" name="tamano_objeto[]" class="form-control" required></select>
-                </div>
-                <div class="form-group">
-                    <label for="${itemId}-suavizante">Suavizante?:</label>
-                    <select id="${itemId}-suavizante" name="suavizante[]" class="form-control" values>
-                        <option value=false>No</option>
-                        <option value=true>Si</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="${itemId}-indicaciones">Indicaciones adicionales:</label>
-                    <input type="text" id="${itemId}-indicaciones" name="indicaciones[]" class="form-control">
-                </div>
-                <div class="form-group">
-                    <button type="button" class="delete-item btn btn-danger">-</button>
+                <div class="container">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="${itemId}-item">Item*:</label>
+                                <select id="${itemId}-item" name="item[]" class="form-control" required></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="${itemId}-tipo_servicio">Tipo de Servicio*:</label>
+                                <select id="${itemId}-tipo_servicio" name="tipo_servicio[]" class="form-control" required></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="${itemId}-color_principal">Color Principal:</label>
+                                <select id="${itemId}-color_principal" name="color_principal[]" class="form-control" required></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="${itemId}-color_secundario">Color Secundario:</label>
+                                <select id="${itemId}-color_secundario" name="color_secundario[]" class="form-control"></select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="${itemId}-patron_tela">Patrón de Tela:</label>
+                                <select id="${itemId}-patron_tela" name="patron_tela[]" class="form-control"></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="${itemId}-tamano_objeto">Tamaño del Objeto*:</label>
+                                <select id="${itemId}-tamano_objeto" name="tamano_objeto[]" class="form-control" required></select>
+                            </div>
+                            <div class="form-group">
+                                <label for="${itemId}-suavizante">Suavizante?:</label>
+                                <select id="${itemId}-suavizante" name="suavizante[]" class="form-control">
+                                    <option value=false>No</option>
+                                    <option value=true>Si</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="${itemId}-indicaciones">Indicaciones adicionales:</label>
+                                <input type="text" id="${itemId}-indicaciones" name="indicaciones[]" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="delete-item btn btn-danger">-</button>
+                    </div>
                 </div>
             </div>
-
         `;
         const deleteButton = newItemDiv.querySelector('.delete-item');
         deleteButton.addEventListener('click', function () {
@@ -270,7 +279,6 @@ document.addEventListener("DOMContentLoaded", function () {
         itemsContainer.appendChild(registerButtonDiv);
         const registerButtonElement = document.getElementById('register-button');
         let orderData = [];
-        orderData.push(id);
         registerButtonElement.addEventListener('click', function () {
             const items = document.querySelectorAll('.item-box');
             items.forEach(item => {
@@ -287,7 +295,30 @@ document.addEventListener("DOMContentLoaded", function () {
                 };
                 orderData.push(elementData);
             });
-            console.log(orderData);
+            fetch(`${endpoints.register_order}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                body: JSON.stringify({
+                    client_id: id,
+                    items: orderData
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Pedido registrado con éxito.');
+                    window.location.href = 'orders';
+                } else {
+                    alert('Ocurrió un error al registrar el pedido. Por favor, inténtelo de nuevo más tarde.');
+                }
+            })
+            .catch(error => {
+                console.error('Error registering new order:', error);
+                alert('Ocurrió un error al registrar el pedido. Por favor, inténtelo de nuevo más tarde.');
+            });
         });
 
         const addItemButton = document.querySelector('#add-item-button');
@@ -338,7 +369,7 @@ document.addEventListener("DOMContentLoaded", function () {
             // Agregar opción vacía como elemento inicial
             const defaultOption = document.createElement('option');
             defaultOption.value = '';
-            defaultOption.textContent = 'Seleccione una opción'; // Texto opcional para la opción vacía
+            defaultOption.textContent = '--'; // Texto opcional para la opción vacía
             select.appendChild(defaultOption);
             
             // Agregar las opciones recibidas del endpoint

@@ -9,7 +9,7 @@ class ClientModel():
             connection = get_connection()
             clients = []
             with connection.cursor() as cursor:
-                cursor.execute("SELECT client_id, full_name, address, phone_number FROM clients LIMIT 5")
+                cursor.execute("SELECT client_id, full_name, address, phone_number FROM clients LIMIT 10")
                 resultset = cursor.fetchall()
                 for row in resultset:
                     client = Client(row[0], row[1], row[2], row[3])

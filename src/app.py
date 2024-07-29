@@ -67,7 +67,7 @@ def clients():
     return render_template('clients.html', clients=clients)
 
 @app.route('/details/<id>', methods=['GET'])
-@login_required
+#@login_required
 def order_details(id):
     details = CompQueries.get_order_details(id)
     return details
@@ -86,14 +86,21 @@ def finish(id):
 def register_order():
     try:
         order = request.json
-        order = Order(
-            id = order['id'],
-            client_id = order['client_id'],
-            status_id = order['status_id'],
-            creation_date = order['creation_date'],
-            finish_date = order['finish_date']
-        )
-        OrderModel.add_order(order)
+        client_id = order['client_id']
+        items = []
+        for item in order['items']:
+            items.append({
+                'item_id':item['item_id'],
+                'service_id':item['service_id'],
+                'maincolor_id':item['maincolor_id'],
+                'othercolor_id':item['othercolor_id'],
+                'pattern_id':item['pattern_id'],
+                'size_id':item['size_id'],
+                'softener':item['softener'],
+                'indications':item['indications']
+            })
+        # POST 500 ERROR after this line
+        CompQueries.register_order(client_id, items)
         return jsonify({'success': True}), 200
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
