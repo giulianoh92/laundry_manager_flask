@@ -1,39 +1,37 @@
 document.addEventListener("DOMContentLoaded", function () {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     const endpoints = {
-        cliente_nombre: "/api/clients",
-        item: "/get_items",
-        tipo_servicio: "/get_services",
-        color_principal: "/get_colors",
-        color_secundario: "/get_colors",
-        patron_tela: "/get_patterns",
-        tamano_objeto: "/get_sizes",
+        client_name: "/api/clients",
+        item: "/api/items",
+        service: "/api/services",
+        color: "/api/colors",
+        pattern: "/api/patterns",
+        size: "/api/sizes",
         register_client: "/api/clients/register",
         register_order: "/api/orders/register_order",
     };
     let id;
     const form = document.querySelector('order_form');
-    const input = document.getElementById('cliente_nombre');
+    const input = document.getElementById('client_name');
     const suggestionBox = document.getElementById('autocomplete-list');
     const checkNameButton = document.getElementById('check-name');
     const label = document.getElementsByClassName('form-label');
     const legend = document.getElementsByTagName('legend');
 
 
-    // Event listener para input de cliente_nombre para autocompletado de nombres similares
+
     input.addEventListener('input', handleInput);
 
     function handleEnterKey(event) {
         if (event.key === 'Enter') {
-          event.preventDefault(); // Optional: prevent the default action if needed
-          checkNameButton.click(); // Trigger a click on the button
+          event.preventDefault(); 
+          checkNameButton.click(); 
         }
       }
   
     input.addEventListener('keydown', handleEnterKey);
     checkNameButton.addEventListener('click', handleCheckName);
 
-    // funcion para manejar el input
     function handleInput() {
         const query = input.value.trim();
         if (query.length > 0) {
@@ -43,11 +41,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Funcion para obtener sugerencias de nombres de clientes registrados
     async function fetchSuggestions(query) {
         try {
-            //peticion HTTP POST para traer los nombres de clientes matching (query)
-            const response = await fetch(`${endpoints.cliente_nombre}?query=${encodeURIComponent(query)}`, {
+            const response = await fetch(`${endpoints.client_name}?query=${encodeURIComponent(query)}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -58,13 +54,12 @@ document.addEventListener("DOMContentLoaded", function () {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
-            showSuggestions(data, query); // mostrar resultados
+            showSuggestions(data, query);
         } catch (error) {
             console.error('Error fetching suggestions:', error);
         }
     }
 
-    // Mostrar las sugerencias obtenidas
     function showSuggestions(suggestions, query) {
         suggestionBox.innerHTML = '';
         suggestions.forEach(suggestion => {
@@ -83,7 +78,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Función para verificar la existencia del cliente ingresado
     async function handleCheckName() {
         id = await checkClientName();
         if (id == null) {
@@ -97,43 +91,39 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Función para agregar un nuevo campo de registro de cliente
     function addClientRegisterField() {
         const itemsContainer = document.querySelector('.client-det');
 
-        // Verificar si ya existe un campo de registro de cliente
         if (!itemsContainer.querySelector('.item')) {
             const newItemDiv = document.createElement('div');
             newItemDiv.classList.add('item');
             newItemDiv.innerHTML = ` 
-                <p class="text-danger">Cliente no existente, por favor registra datos del nuevo cliente</p>
+                <p class="text-danger">Client does not exist, please register the new client's information</p>
                 <div class="item-box border p-3 mb-3">
                     <div class="form-group">
-                        <label for="address">Dirección:</label>
+                        <label for="address">Address:</label>
                         <input type="text" id="address" name="address[]" class="form-control" required>
                     </div>
                     <div class="form-group">
-                        <label for="phone_number">Número de teléfono:</label>
+                        <label for="phone_number">Phone number:</label>
                         <input type="text" id="phone_number" name="phone_number[]" class="form-control" required>
                     </div>
                     <!-- Botón para registrar el cliente -->
-                    <button type="button" class="register-client btn btn-primary">Registrar Cliente</button>
+                    <button type="button" class="register-client btn btn-primary">Register Client</button>
                 </div>
             `;
             itemsContainer.appendChild(newItemDiv);
             
-            // Inicializar el nuevo botón
             const registerNewClientButton = newItemDiv.querySelector('.register-client');
             registerNewClientButton.addEventListener('click', registerNewClient);
         }
     }
 
-    // Función asincrónica para verificar si el nombre del cliente existe
     async function checkClientName() {
         const clientName = input.value.trim();
         if (clientName.length > 0) {
             try {
-                const response = await fetch(`${endpoints.cliente_nombre}?query=${encodeURIComponent(clientName)}`, {
+                const response = await fetch(`${endpoints.client_name}?query=${encodeURIComponent(clientName)}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -155,23 +145,21 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
             } catch (error) {
                 console.error('Error checking client name:', error);
-                alert('Ocurrió un error al verificar el nombre del cliente. Por favor, inténtelo de nuevo más tarde.');
+                alert('An error occurred while verifying the client name. Please try again later.');
             }
         } else {
-            alert('Por favor, ingrese un nombre de cliente.');
+            alert('Please enter a client name.');
             return -1;
         }
     }
 
-    // Función para registrar un nuevo cliente
     function registerNewClient() {
-        const name = document.getElementById('cliente_nombre').value;
+        const name = document.getElementById('client_name').value;
         const address = document.getElementById('address').value;
         const phone_number = document.getElementById('phone_number').value;
 
-        // Verificar que name, address, and phone_number no estén vacíos
         if (!name || !address || !phone_number) {
-            alert('Por favor, complete todos los campos.');
+            alert('Please complete all fields');
             return;
         }
 
@@ -190,16 +178,16 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Cliente registrado con éxito.');
+                alert('Client successfully registered.');
                 document.querySelector('.client-det').remove();
                 handleCheckName();
             } else {
-                alert('Ocurrió un error al registrar el cliente. Por favor, inténtelo de nuevo más tarde.');
+                alert('An error occurred while registering the client. Please try again later.');
             }
         })
         .catch(error => {
             console.error('Error registering new client:', error);
-            alert('Ocurrió un error al registrar el cliente. Por favor, inténtelo de nuevo más tarde.');
+            alert('An error occurred while registering the client. Please try again later.');
         });
     }
 
@@ -217,21 +205,21 @@ document.addEventListener("DOMContentLoaded", function () {
     function createNewItemField(itemId) {
         const newItemDiv = document.createElement('div');
         newItemDiv.innerHTML = `
-            <p class="text-danger">Campos marcados con * son obligatorios</p>
+            <p class="text-danger">Fields marked with * are required</p>
             <div class="item-box border p-3 mb-3">
                 <div class="container">
                     <div class="row">
                         <div class="col-md-6">
                             ${createFormGroup('item', itemId, 'Item*:', true)}
-                            ${createFormGroup('tipo_servicio', itemId, 'Tipo de Servicio*:', true)}
-                            ${createFormGroup('color_principal', itemId, 'Color Principal:', true)}
-                            ${createFormGroup('color_secundario', itemId, 'Color Secundario:', false)}
+                            ${createFormGroup('service', itemId, 'Service*:', true)}
+                            ${createFormGroup('main_color', itemId, 'Main Color:', true)}
+                            ${createFormGroup('other_color', itemId, 'Other Color:', false)}
                         </div>
                         <div class="col-md-6">
-                            ${createFormGroup('patron_tela', itemId, 'Patrón de Tela:', false)}
-                            ${createFormGroup('tamano_objeto', itemId, 'Tamaño del Objeto*:', true)}
-                            ${createFormGroup('suavizante', itemId, 'Suavizante?:', false, true)}
-                            ${createInputGroup('indicaciones', itemId, 'Indicaciones adicionales:', false)}
+                            ${createFormGroup('pattern', itemId, 'Pattern:', false)}
+                            ${createFormGroup('size', itemId, 'Size*:', true)}
+                            ${createFormGroup('softener', itemId, 'Softener?:', false, true)}
+                            ${createInputGroup('indications', itemId, 'Additional indications:', false)}
                         </div>
                     </div>
                     <div class="form-group">
@@ -243,7 +231,6 @@ document.addEventListener("DOMContentLoaded", function () {
         return newItemDiv;
     }
 
-    // Crea un grupo de formulario para los selects
     function createFormGroup(name, itemId, label, isRequired, isSoftener = false) {
         return `
             <div class="form-group">
@@ -255,7 +242,6 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
     }
 
-    // Crea un grupo de formulario para los inputs
     function createInputGroup(name, itemId, label, isRequired) {
         return `
             <div class="form-group">
@@ -265,7 +251,6 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
     }
 
-    // Agrega el botón de eliminación al nuevo campo de item
     function addDeleteButton(newItemDiv) {
         const deleteButton = newItemDiv.querySelector('.delete-item');
         deleteButton.addEventListener('click', function () {
@@ -273,7 +258,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Agrega el botón de registrar
     function addRegisterButton(itemsContainer) {
         const registerButton = document.getElementById('register-button');
         if (registerButton) {
@@ -281,7 +265,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         const registerButtonDiv = document.createElement('div');
         registerButtonDiv.innerHTML = `
-            <button type="button" class="btn btn-primary" id="register-button">Registrar</button>
+            <button type="button" class="btn btn-primary" id="register-button">Register</button>
         `;
         itemsContainer.appendChild(registerButtonDiv);
 
@@ -289,7 +273,6 @@ document.addEventListener("DOMContentLoaded", function () {
         registerButtonElement.addEventListener('click', registerOrder);
     }
 
-    // Registra el pedido al hacer clic en el botón de registrar
     function registerOrder() {
         const items = document.querySelectorAll('.item-box');
         const orderData = Array.from(items).map(item => {
@@ -320,26 +303,25 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('Pedido registrado con éxito.');
+                alert('Order successfully registered.');
                 window.location.href = 'orders';
             } else {
-                alert('Ocurrió un error al registrar el pedido. Por favor, inténtelo de nuevo más tarde.');
+                alert('An error occurred while registering the order. Please try again later.');
             }
         })
         .catch(error => {
             console.error('Error registering new order:', error);
-            alert('Ocurrió un error al registrar el pedido. Por favor, inténtelo de nuevo más tarde.');
+            alert('An error occurred while registering the order. Please try again later.');
         });
     }
 
-    // Cargar opciones para los campos de selección
     function loadOptionsForFields(itemId) {
         loadOptions(endpoints.item, `${itemId}-item`);
-        loadOptions(endpoints.tipo_servicio, `${itemId}-tipo_servicio`);
-        loadOptions(endpoints.color_principal, `${itemId}-color_principal`);
-        loadOptions(endpoints.color_secundario, `${itemId}-color_secundario`);
-        loadOptions(endpoints.patron_tela, `${itemId}-patron_tela`);
-        loadOptions(endpoints.tamano_objeto, `${itemId}-tamano_objeto`);
+        loadOptions(endpoints.service, `${itemId}-service`);
+        loadOptions(endpoints.color, `${itemId}-main_color`);
+        loadOptions(endpoints.color, `${itemId}-other_color`);
+        loadOptions(endpoints.pattern, `${itemId}-pattern`);
+        loadOptions(endpoints.size, `${itemId}-size`);
     }
 
     // Función principal para agregar un nuevo campo de item
@@ -356,7 +338,7 @@ document.addEventListener("DOMContentLoaded", function () {
         
     }
 
-    // Function to add the green button
+
     function addAddItemButton(itemsContainer) {
         const addItemButton = document.querySelector('#add-item-button');
         if (addItemButton) {
@@ -364,14 +346,13 @@ document.addEventListener("DOMContentLoaded", function () {
         }
         const addItemButtonDiv = document.createElement('div');
         addItemButtonDiv.innerHTML = `
-            <button type="button" class="btn btn-secondary" id="add-item-button">Añadir Item</button>
+            <button type="button" class="btn btn-secondary" id="add-item-button">Add Item</button>
         `;
         itemsContainer.appendChild(addItemButtonDiv);
         const newAddItemButton = document.querySelector('#add-item-button');
         newAddItemButton.addEventListener('click', addNewItemField);
     }
 
-    // Función para cargar opciones en un select desde un endpoint
     async function loadOptions(endpoint, selectId) {
         try {
             const response = await fetch(endpoint);
@@ -380,17 +361,14 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             const data = await response.json();
             const select = document.getElementById(selectId);
-            
-            // Limpiar opciones actuales del select
+
             select.innerHTML = '';
-            
-            // Agregar opción vacía como elemento inicial
+
             const defaultOption = document.createElement('option');
             defaultOption.value = '';
-            defaultOption.textContent = '--'; // Texto opcional para la opción vacía
+            defaultOption.textContent = '--'; 
             select.appendChild(defaultOption);
-            
-            // Agregar las opciones recibidas del endpoint
+ 
             data.forEach(option => {
                 const optionElement = document.createElement('option');
                 optionElement.value = option.id;
@@ -402,7 +380,6 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Function to generate a unique ID
     function generateUniqueId() {
         return 'item-' + Date.now();
     }

@@ -1,14 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_wtf.csrf import CSRFProtect
-from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from flask_login import LoginManager, login_user, logout_user, login_required
 from models.ClientModel import ClientModel
 from models.UserModel import UserModel
-from models.ItemModel import ItemModel
-from models.OrderModel import OrderModel
-from models.ServiceModel import ServiceModel
-from models.ColorModel import ColorModel
-from models.SizeModel import SizeModel
-from models.PatternModel import PatternModel
 from models.entities.User import User
 from models.entities.Client import Client
 from models.entities.Order import Order
@@ -16,7 +10,7 @@ from queries import CompQueries
 from config import config
 
 # Routes
-from routes import Order, Client
+from routes import Order, Client, Item, Service, Color, Pattern, Size
 
 app = Flask(__name__)
 csrf = CSRFProtect()
@@ -37,7 +31,7 @@ def login():
         logged_user = UserModel.login(user)
         if ((logged_user and logged_user.password)):
             login_user(logged_user)
-            return redirect(url_for('home'))
+            return redirect(url_for('orders'))
         else:
             flash("Invalid credentials.")
             return render_template('auth/login.html')
@@ -49,10 +43,10 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-@app.route('/home')
+@app.route('/register')
 @login_required
-def home():
-    return render_template('home.html')
+def register():
+    return render_template('register.html')
 
 @app.route('/orders')
 @login_required
@@ -65,38 +59,6 @@ def orders():
 def clients():
     clients = ClientModel.get_clients() 
     return render_template('clients.html', clients=clients)
-
-
-@app.route('/get_items', methods=['GET'])
-@login_required
-def get_items():
-    items = ItemModel.get_items()
-    return jsonify(items)
-
-@app.route('/get_services', methods=['GET'])
-@login_required
-def get_services():
-    services = ServiceModel.get_services()
-    return jsonify(services)
-
-@app.route('/get_colors', methods=['GET'])
-@login_required
-def get_colors():
-    colors = ColorModel.get_colors()
-    return jsonify(colors)
-
-@app.route('/get_patterns', methods=['GET'])
-@login_required
-def get_patterns():
-    patterns = PatternModel.get_patterns()
-    return jsonify(patterns)
-
-@app.route('/get_sizes', methods=['GET'])
-@login_required
-def get_sizes():
-    sizes = SizeModel.get_sizes()
-    return jsonify(sizes)
-
 
 def page_not_found(error):
     return "<h1>Not found</h1>", 404
@@ -113,6 +75,11 @@ if __name__ == '__main__':
     # Blueprints
     app.register_blueprint(Order.main, url_prefix='/api/orders')
     app.register_blueprint(Client.main, url_prefix='/api/clients')
+    app.register_blueprint(Item.main, url_prefix='/api/items')
+    app.register_blueprint(Service.main, url_prefix='/api/services')
+    app.register_blueprint(Color.main, url_prefix='/api/colors')
+    app.register_blueprint(Pattern.main, url_prefix='/api/patterns')
+    app.register_blueprint(Size.main, url_prefix='/api/sizes')
 
     csrf.init_app(app)
     app.register_error_handler(401, status_401)

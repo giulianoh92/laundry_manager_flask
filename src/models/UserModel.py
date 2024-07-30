@@ -7,11 +7,11 @@ class UserModel():
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                cursor.execute("""SELECT user_id, password, username, email FROM users 
+                cursor.execute("""SELECT user_id, password, username FROM users 
                                   WHERE username = %s""", (user.name,))
                 row = cursor.fetchone()
                 if row:
-                    user = User(row[0], User.check_password(row[1], user.password), row[2], row[3])
+                    user = User(row[0], User.check_password(row[1], user.password), row[2])
                     return user
                 else:
                     return None
@@ -23,11 +23,11 @@ class UserModel():
         try:
             connection = get_connection()
             with connection.cursor() as cursor:
-                cursor.execute("""SELECT user_id, password, username, email FROM users 
+                cursor.execute("""SELECT user_id, password, username FROM users 
                                   WHERE user_id = %s""", (id,))
                 row = cursor.fetchone()
                 if row:
-                    user = User(row[0], row[1], row[2], row[3])
+                    user = User(row[0], row[1], row[2])
                     return user
                 else:
                     return None

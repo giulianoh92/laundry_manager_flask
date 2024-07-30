@@ -1,0 +1,35 @@
+.status-finished {
+    background-color: rgb(155, 250, 140);
+    color: black;
+    font-weight: bold;
+}
+.status-canceled {
+    background-color: rgb(250, 137, 137);
+    color: black;
+    font-weight: bold;
+}
+.status-pending {
+    background-color: rgb(247, 247, 136);
+    color: black;
+    font-weight: bold;
+}
+.btn-custom-green {
+    background-color: #28a745;
+    border-color: #28a745; 
+    color: white;
+}
+
+.btn-custom-green:hover {
+    background-color: #218838; 
+    border-color: #1e7e34;
+}
+.btn-custom-red {
+    background-color: #dc3545; 
+    border-color: #ad2432; 
+    color: white;
+}
+
+.btn-custom-red:hover {
+    background-color: #c82333; 
+    border-color: #c82333; 
+}

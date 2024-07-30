@@ -13,10 +13,10 @@
 
 <body>
     <nav class="navbar navbar-dark sticky-top bg-dark flex-md-nowrap p-2">
-        <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="{{ url_for('home') }}">Inicio</a>
+        <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="{{ url_for('orders') }}">Home</a>
         <ul class="navbar-nav px-3">
           <li class="nav-item text-nowrap">
-            <a class="nav-link" href="{{ url_for('logout') }}">Cerrar Sesión</a>
+            <a class="nav-link" href="{{ url_for('logout') }}">Log out</a>
           </li>
         </ul>
     </nav>
@@ -27,58 +27,24 @@
         <div class="sidebar-sticky">
             <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('home') }}">
-                <span data-feather="home"></span>
-                Home <span class="sr-only"></span>
-                </a>
+              <a class="nav-link" href="{{ url_for('orders') }}">
+              <span data-feather="list"></span>
+              Orders
+              </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('orders') }}">
-                <span data-feather="file"></span>
-                Pedidos
+                <a class="nav-link" href="{{ url_for('register') }}">
+                <span data-feather="check-circle"></span>
+                Register <span class="sr-only"></span>
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link" href="{{ url_for('clients') }}">
                 <span data-feather="users"></span>
-                Clientes
+                Clients
                 </a>
             </li>
             </ul>
-            <!--
-            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-            <span>Reportes</span>
-            <a class="d-flex align-items-center text-muted" href="{{ url_for('home') }}">
-                <span data-feather="plus-circle"></span>
-            </a>
-            </h6>
-            <ul class="nav flex-column mb-2">
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('home') }}">
-                <span data-feather="file-text"></span>
-                Última semana
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('home') }}">
-                <span data-feather="file-text"></span>
-                Último mes
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('home') }}">
-                <span data-feather="file-text"></span>
-                Últimos 6 meses
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('home') }}">
-                <span data-feather="file-text"></span>
-                Últimos 12 meses
-                </a>
-            </li>
-            </ul>
-            -->
         </div>     
       </nav>
 

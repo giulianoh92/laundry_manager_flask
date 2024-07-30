@@ -1,6 +1,6 @@
 {% extends './base.html' %}
 
-{% block title %}Dashboard{% endblock %}
+{% block title %}Home{% endblock %}
 
 {% block customCSS %}
 <!-- Link to a Google Font (example) -->
@@ -12,11 +12,11 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <form id="order_form" class="needs-validation" novalidate>
         <fieldset class="item border p-4 mb-4">
-            <legend class="w-auto px-2">Registrar nuevo pedido</legend>
+            <legend class="w-auto px-2">Register new order</legend>
             <div class="form-group">
-                <label for="cliente_nombre" class="form-label">Nombre del Cliente</label>
+                <label for="client_name" class="form-label">Client name</label>
                 <div class="input-group">
-                    <input type="text" id="cliente_nombre" class="form-control" placeholder="Buscar cliente..." required>
+                    <input type="text" id="client_name" class="form-control" placeholder="Search for client..." required>
                     <div class="input-group-append">
                         <button type="button" id="check-name" class="btn btn-outline-primary">&#10003</button>
                     </div>

@@ -14,8 +14,7 @@ DROP TABLE IF EXISTS users;
 CREATE TABLE users (
     user_id SERIAL PRIMARY KEY,
     password VARCHAR(255) NOT NULL,
-    username VARCHAR(50),
-    email VARCHAR(100)
+    username VARCHAR(50)
 );
 
 CREATE TABLE clients (
@@ -89,3 +88,22 @@ CREATE TABLE order_services (
     FOREIGN KEY (pattern_id) REFERENCES patterns(pattern_id),
     FOREIGN KEY (size_id) REFERENCES sizes(size_id)
 );
+
+DO $$
+DECLARE
+    tbl RECORD;
+BEGIN
+    FOR tbl IN
+        SELECT tablename
+        FROM pg_tables
+        WHERE schemaname = 'public'
+    LOOP
+        EXECUTE 'GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.' || tbl.tablename || ' TO laundry_admin';
+    END LOOP;
+END $$;
+
+GRANT USAGE, SELECT ON SEQUENCE order_services_os_id_seq TO laundry_admin;
+
+GRANT USAGE, SELECT ON SEQUENCE orders_order_id_seq TO laundry_admin;
+
+GRANT USAGE, SELECT ON SEQUENCE clients_client_id_seq TO laundry_admin;

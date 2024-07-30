@@ -2,4 +2,3 @@
 __pycache__/
 *.py[cod]
 .env
-laundry_dml.sql

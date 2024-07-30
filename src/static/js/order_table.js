@@ -3,7 +3,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
     rows.forEach(row => {
         row.addEventListener("click", function(event) {
-            // Evitar que se active el detalle si se hizo clic en el botón "Terminar"
             if (event.target.classList.contains('finish-button')) {
                 const orderId = event.target.getAttribute("data-order-id");
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -12,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken // Incluir el token CSRF en el encabezado X-CSRFToken
+                        'X-CSRFToken': csrfToken 
                     },
                     body: JSON.stringify({ orderId: orderId })
                 })
@@ -23,28 +22,22 @@ document.addEventListener("DOMContentLoaded", function() {
                     return response.json();
                 })
                 .then(data => {
-                    // Manejar la respuesta del servidor
                     if (data.success === true && data.finish_date) {
-                        console.log('Orden marcada como terminada:', data.finish_date);
-                        // Recargar la página después de un segundo
                         setTimeout(() => {
                             location.reload();
                         }, 1000);
                     } else {
-                        console.error('Respuesta inesperada del servidor:', data);
+                        console.error('Unexpected server response:', data);
                     }
                 })
                 .catch(error => console.error('Error marking order as finished:', error));
             } else {
-                // Código para mostrar detalles de la orden como antes
                 const orderId = this.getAttribute("data-order-id");
                 let detailsRows = Array.from(this.parentElement.children).filter(child => child.classList.contains('details-row'));
 
-                // Si hay detalles visibles, se eliminan para ocultarlos
                 if (detailsRows.length > 0) {
                     detailsRows.forEach(detailsRow => detailsRow.remove());
                 } else {
-                    // Si no hay detalles visibles, se hace la solicitud para obtener los detalles
                     fetch(`/api/orders/details/${orderId}`)
                         .then(response => {
                             if (!response.ok) {
@@ -53,16 +46,11 @@ document.addEventListener("DOMContentLoaded", function() {
                             return response.json();
                         })
                         .then(data => {
-                            // Limpiar cualquier detalle existente antes de agregar nuevos
                             detailsRows.forEach(detailsRow => detailsRow.remove());
 
-                            // Construir y mostrar los detalles de la orden para cada objeto en la lista
                             data.forEach(order => {
-                                // Determine if a comma should be included
                                 const mainColor = order.main_color ?? '';
                                 const otherColor = order.other_color ?? '';
-                            
-                                // Construct the colors string based on availability of colors
                                 const colorsHTML = mainColor && otherColor
                                     ? `${mainColor}, ${otherColor}`
                                     : mainColor || otherColor;
@@ -74,14 +62,14 @@ document.addEventListener("DOMContentLoaded", function() {
                                                 <div class="row">
                                                     <div class="col-md-6">
                                                         <strong>Item: </strong> ${order.item_name ?? ''}<br>
-                                                        <strong>Colores:</strong> ${colorsHTML}<br>
-                                                        <strong>Patrón: </strong>${order.pattern_name ?? ''}<br>
-                                                        <strong>Tamaño: </strong> ${order.size_name ?? ''}<br>
+                                                        <strong>Colors:</strong> ${colorsHTML}<br>
+                                                        <strong>Pattern: </strong>${order.pattern_name ?? ''}<br>
+                                                        <strong>Size: </strong> ${order.size_name ?? ''}<br>
                                                     </div>
                                                     <div class="col-md-6">
-                                                        <strong>Servicio: </strong> ${order.service_name ?? ''}<br>
-                                                        <strong>Suavizante: </strong> ${order.softener ? 'Sí' : 'No'}<br>
-                                                        <strong>Costo: </strong> $${order.cost ?? ''}<br>
+                                                        <strong>Service: </strong> ${order.service_name ?? ''}<br>
+                                                        <strong>Softener: </strong> ${order.softener ? 'Yes' : 'No'}<br>
+                                                        <strong>Price: </strong> $${order.cost ?? ''}<br>
                                                     </div>
                                                 </div>
                                             </div>
