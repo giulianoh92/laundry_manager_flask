@@ -7,7 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
     <link rel="shortcut icon" href="{{ url_for('static', filename='img/flask.svg') }}">
-    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" crossorigin="anonymous">
     <!-- Custom CSS 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">-->
@@ -15,36 +14,41 @@
 
 <body class="d-flex justify-content-center align-items-center min-vh-100 bg-dark text-light">
     <div class="container">
-        <form class="form-signin bg-secondary p-4 rounded shadow-lg" action="/login" method="POST">
-            <div class="text-center mb-4">
-                <img class="mb-4" src="{{ url_for('static', filename='images/logo.png') }}" alt="" width="200" height="200">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <form class="form-signin bg-secondary p-4 rounded shadow-lg" action="/login" method="POST">
+                    <div class="text-center mb-4">
+                        <img class="mb-4" src="{{ url_for('static', filename='images/logo.png') }}" alt="" width="200" height="200">
+                    </div>
+                    {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                    <div class="alert alert-primary alert-dismissible fade show" role="alert">
+                        {% for message in messages %}
+                        <strong>{{ message }}</strong>
+                        {% endfor %}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+                    <h1 class="h3 mb-3 fw-normal text-center">Laundry Management System</h1>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control bg-dark text-light" id="username" name="username" placeholder="Username" required>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="password" class="form-control bg-dark text-light" id="password" name="password" placeholder="Password" required>
+                    </div>
+                    <button class="w-100 btn btn-lg btn-primary" type="submit">Login</button>
+                </form>
             </div>
-            {% with messages = get_flashed_messages() %}
-            {% if messages %}
-            <div class="alert alert-primary alert-dismissible fade show" role="alert">
-                {% for message in messages %}
-                <strong>{{ message }}</strong>
-                {% endfor %}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            {% endif %}
-            {% endwith %}
-            <h1 class="h3 mb-3 fw-normal text-center">Inicio de Sesión</h1>
-            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div class="form-floating mb-3">
-                <input type="text" class="form-control bg-dark text-light" id="username" name="username" placeholder="Usuario" required>
-            </div>
-            <div class="form-floating mb-3">
-                <input type="password" class="form-control bg-dark text-light" id="password" name="password" placeholder="Contraseña" required>
-            </div>
-            <button class="w-100 btn btn-lg btn-primary" type="submit">Ingresar</button>
-        </form>
+        </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj"
-        crossorigin="anonymous"></script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj"
+    crossorigin="anonymous">
+</script>
 </body>
 
 </html>

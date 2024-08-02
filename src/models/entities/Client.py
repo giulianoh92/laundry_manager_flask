@@ -1,5 +1,5 @@
-class Client():
-    def __init__(self, client_id, full_name = None, address = None, phone_number = None) -> None:
+class Client:
+    def __init__(self, client_id, full_name=None, address=None, phone_number=None):
         self.client_id = client_id
         self.full_name = full_name
         self.address = address
@@ -9,7 +9,6 @@ class Client():
         return {
             "client_id": self.client_id,
             "full_name": self.full_name,
-            "address" : self.address,
+            "address": self.address,
             "phone_number": self.phone_number
         }
-    

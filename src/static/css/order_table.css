@@ -33,3 +33,19 @@
     background-color: #c82333; 
     border-color: #c82333; 
 }
+
+
+@keyframes slideDown {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.details-row {
+    animation: slideDown 0.5s ease-out;
+}

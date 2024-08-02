@@ -2,8 +2,6 @@ from database.db import get_connection
 from flask import jsonify
 import datetime
 
-
-
 class Order_det():
     def __init__(self, item_name, main_color, other_color, pattern_name, size_name, service_name, softener, cost):
         self.item_name = item_name
@@ -57,31 +55,9 @@ class CompQueries():
             details = []
             with connection.cursor() as cursor:
                 cursor.execute("""
-                                SELECT
-                                    i.description AS item_name,
-                                    c1.name AS color1_name,
-                                    c2.name AS color2_name,
-                                    p.name AS pattern_name,
-                                    si.name AS size_name,
-                                    s.name AS service_name,
-                                    os.softener AS softener,
-                                    ROUND(((i.cost + s.cost) * si.cost_multiplier)::numeric, 2) AS "cost"
-                                FROM
-                                    order_services os
-                                INNER JOIN
-                                    items i ON i.item_id = os.item_id
-                                LEFT JOIN
-                                    colors AS c1 ON c1.color_id = os.main_color_id
-                                LEFT JOIN
-                                    colors AS c2 ON c2.color_id = os.other_color_id
-                                LEFT JOIN
-                                    patterns p ON p.pattern_id = os.pattern_id
-                                INNER JOIN
-                                    sizes si ON si.size_id = os.size_id
-                                INNER JOIN
-                                    services s ON s.service_id = os.service_id
-                                WHERE
-                                    os.order_id = %s;
+                                SELECT *
+                                FROM order_details_view
+                                WHERE order_id = %s;
                                 """, (id,))
                 resultset = cursor.fetchall()
                 for row in resultset:
@@ -106,38 +82,8 @@ class CompQueries():
             orders = []
             with connection.cursor() as cursor:
                 cursor.execute("""
-                    SELECT 
-                        o.order_id as id, 
-                        c.full_name as client_name, 
-                        st.description AS status, 
-                        c.address AS address, 
-                        ROUND(SUM((it.cost + s.cost) * si.cost_multiplier)::numeric, 2) AS total_cost,
-                        TO_CHAR(o.creation_date, 'DD/MM/YYYY') AS c_date, 
-                        TO_CHAR(o.finish_date, 'DD/MM/YYYY') AS f_date
-                    FROM 
-                        orders o
-                    INNER JOIN 
-                        clients c ON o.client_id = c.client_id
-                    INNER JOIN 
-                        statuses st ON o.status_id = st.status_id
-                    INNER JOIN 
-                        order_services os ON o.order_id = os.order_id
-                    INNER JOIN 
-                        items it ON os.item_id = it.item_id
-                    INNER JOIN 
-                        services s ON os.service_id = s.service_id
-                    INNER JOIN 
-                        sizes si ON os.size_id = si.size_id
-                    GROUP BY 
-                        id, 
-                        client_name, 
-                        status, 
-                        address, 
-                        c_date, 
-                        f_date,
-                        st.status_id
-                    ORDER BY
-                        st.status_id, id DESC
+                    SELECT *
+                    FROM order_wnames_view
                     LIMIT 10;
                 """)
                 resultset = cursor.fetchall()
